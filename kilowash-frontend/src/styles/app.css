@@ -99,6 +99,7 @@ input, select, textarea, button { font-family: var(--font-body); }
 .app-layout {
   display: flex;
   min-height: 100vh;
+  overflow-x: hidden;
 }
 
 /* ============================================================
@@ -265,6 +266,7 @@ input, select, textarea, button { font-family: var(--font-body); }
    ============================================================ */
 .main-content {
   flex: 1;
+  min-width: 0;
   margin-left: var(--sidebar-width);
   display: flex;
   flex-direction: column;

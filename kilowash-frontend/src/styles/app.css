@@ -303,6 +303,11 @@ input, select, textarea, button { font-family: var(--font-body); }
   gap: 12px;
 }
 
+/* Hamburger: hidden on desktop, shown by @media mobile below */
+.btn-hamburger {
+  display: none;
+}
+
 .page-body {
   padding: 28px 32px;
   flex: 1;
@@ -824,6 +829,162 @@ input, select, textarea, button { font-family: var(--font-body); }
 .kanban-card-actions {
   display: flex;
   gap: 8px;
+}
+
+/* ============================================================
+   RESPONSIVE — MOBILE
+   ============================================================ */
+@media (max-width: 768px) {
+  :root {
+    --sidebar-width: 0px;
+  }
+
+  /* Sidebar tersembunyi default, muncul saat .open */
+  .sidebar {
+    width: 260px;
+    transform: translateX(-100%);
+    transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 300;
+  }
+
+  .sidebar.open {
+    transform: translateX(0);
+  }
+
+  /* Overlay gelap saat sidebar terbuka */
+  .sidebar-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 299;
+    backdrop-filter: none;
+  }
+  .sidebar-overlay.active {
+    display: block;
+  }
+
+  .main-content {
+    margin-left: 0;
+  }
+
+  /* Topbar: tampilkan hamburger menu */
+  .topbar {
+    padding: 0 16px;
+    gap: 12px;
+  }
+
+  .topbar-title h1 {
+    font-size: 15px;
+  }
+
+  .topbar-title p {
+    display: none;
+  }
+
+  .btn-hamburger {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 22px;
+    flex-shrink: 0;
+    color: var(--text-primary);
+  }
+
+  .page-body {
+    padding: 16px;
+  }
+
+  /* Stats grid: 2 kolom di mobile */
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 12px;
+  }
+
+  /* Table: scroll horizontal */
+  .table-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Card full width */
+  .card {
+    border-radius: 12px;
+  }
+
+  /* Form row jadi satu kolom */
+  .form-row {
+    flex-direction: column;
+    gap: 0;
+  }
+
+  /* Modal full width */
+  .modal-box {
+    width: 95vw !important;
+    max-width: 95vw !important;
+    max-height: 90vh;
+    overflow-y: auto;
+    margin: 16px;
+    border-radius: 16px;
+  }
+
+  /* Filters: wrap ke bawah */
+  .filter-bar, .d-flex.gap-12.align-center {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .filter-bar .form-control,
+  .filter-bar select,
+  .filter-bar input {
+    flex: 1;
+    min-width: 120px;
+  }
+
+  /* Topbar actions */
+  .topbar-actions {
+    gap: 8px;
+  }
+
+  /* Kanban kolom: scroll horizontal */
+  .kanban-board {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 8px;
+  }
+  .kanban-col {
+    min-width: 280px;
+  }
+
+  /* Sembunyikan teks di beberapa tombol */
+  .btn-sm .btn-text-desktop {
+    display: none;
+  }
+}
+
+/* Extra small (< 480px) */
+@media (max-width: 480px) {
+  .stats-grid {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 10px;
+  }
+
+  .stat-card {
+    padding: 14px;
+  }
+
+  .stat-value {
+    font-size: 18px !important;
+  }
+
+  .topbar-actions .btn:not(.btn-primary) {
+    display: none;
+  }
 }
 
 /* ============================================================

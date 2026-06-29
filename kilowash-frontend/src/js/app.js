@@ -114,7 +114,7 @@ class AppSidebar extends HTMLElement {
     };
 
     this.innerHTML = `
-      <aside class="sidebar">
+      <aside class="sidebar" id="appSidebar">
         <div class="sidebar-brand">
           <div class="brand-icon">🧺</div>
           <div class="brand-text">
@@ -134,8 +134,13 @@ class AppSidebar extends HTMLElement {
         ${user.role === 'owner' ? `
         <div class="sidebar-section">
           <div class="sidebar-section-label">Laporan & Master</div>
-          ${nav('reports.html', '📈', 'Laporan', ['owner'])}
+          ${nav('reports.html', '📈', 'Laporan', ['owner', 'admin'])}
           ${nav('master.html', '⚙️', 'Data Master', ['owner'])}
+        </div>
+        ` : user.role === 'admin' ? `
+        <div class="sidebar-section">
+          <div class="sidebar-section-label">Laporan & Master</div>
+          ${nav('reports.html', '📈', 'Laporan', ['owner', 'admin'])}
         </div>
         ` : ''}
 
@@ -152,6 +157,7 @@ class AppSidebar extends HTMLElement {
           </button>
         </div>
       </aside>
+      <div class="sidebar-overlay" id="sidebarOverlay"></div>
     `;
 
     document.getElementById('logoutBtn').addEventListener('click', () => {
@@ -159,6 +165,45 @@ class AppSidebar extends HTMLElement {
       localStorage.removeItem('kw_user');
       window.location.href = 'login.html';
     });
+
+    // Mobile sidebar overlay close
+    const overlay = document.getElementById('sidebarOverlay');
+    if (overlay) {
+      overlay.addEventListener('click', () => closeMobileSidebar());
+    }
   }
 }
 customElements.define('app-sidebar', AppSidebar);
+
+// ============================================================
+// MOBILE SIDEBAR HELPERS
+// ============================================================
+function openMobileSidebar() {
+  const sidebar = document.getElementById('appSidebar');
+  const overlay = document.getElementById('sidebarOverlay');
+  if (sidebar) sidebar.classList.add('open');
+  if (overlay) overlay.classList.add('active');
+}
+
+function closeMobileSidebar() {
+  const sidebar = document.getElementById('appSidebar');
+  const overlay = document.getElementById('sidebarOverlay');
+  if (sidebar) sidebar.classList.remove('open');
+  if (overlay) overlay.classList.remove('active');
+}
+
+// Tambahkan tombol hamburger ke topbar setelah semua DOM siap
+function setupSidebar() {
+  // Tunggu AppSidebar selesai render
+  requestAnimationFrame(() => {
+    const topbar = document.querySelector('.topbar');
+    if (!topbar || document.getElementById('btnHamburger')) return;
+    const btn = document.createElement('button');
+    btn.id = 'btnHamburger';
+    btn.className = 'btn-hamburger';
+    btn.setAttribute('aria-label', 'Buka menu');
+    btn.innerHTML = '☰';
+    btn.addEventListener('click', openMobileSidebar);
+    topbar.insertBefore(btn, topbar.firstChild);
+  });
+}

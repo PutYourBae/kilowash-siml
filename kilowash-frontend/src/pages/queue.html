@@ -85,14 +85,15 @@
     });
 
     async function loadKanban() {
-      const { ok, data } = await api('/orders?status=diterima');
-      const { ok: ok2, data: d2 } = await api('/orders?status=proses');
-      const { ok: ok3, data: d3 } = await api('/orders?status=selesai');
+      // Limit 100 per kolom sudah cukup banyak untuk layar kanban
+      const { ok, data } = await api('/orders?status=diterima&limit=100');
+      const { ok: ok2, data: d2 } = await api('/orders?status=proses&limit=100');
+      const { ok: ok3, data: d3 } = await api('/orders?status=selesai&limit=100');
 
       const allOrders = [
-        ...(ok && data.success ? data.orders : []),
-        ...(ok2 && d2.success ? d2.orders : []),
-        ...(ok3 && d3.success ? d3.orders : []),
+        ...(ok && data.success ? data.data.orders : []),
+        ...(ok2 && d2.success ? d2.data.orders : []),
+        ...(ok3 && d3.success ? d3.data.orders : []),
       ];
 
       const cols = { diterima: [], proses: [], selesai: [] };

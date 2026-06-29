@@ -174,9 +174,10 @@
     function debounce(fn, d) { let t; return (...a) => { clearTimeout(t); t = setTimeout(()=>fn(...a),d); }; }
 
     async function loadOrders() {
-      const { ok, data } = await api('/orders?status=selesai');
+      // Ambil hingga 100 order yang sudah selesai tapi belum diambil/dibayar
+      const { ok, data } = await api('/orders?status=selesai&limit=100');
       if (!ok) return;
-      allOrders = data.orders;
+      allOrders = data.data.orders;
       renderOrders(allOrders);
       document.getElementById('readyCount').textContent = allOrders.length;
 

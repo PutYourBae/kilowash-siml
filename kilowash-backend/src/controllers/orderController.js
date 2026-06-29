@@ -19,6 +19,10 @@ const generateOrderCode = async () => {
 exports.getOrders = async (req, res) => {
   try {
     const { status, date, service_type_id, search } = req.query;
+    const page = parseInt(req.query.page, 10) || 1;
+    const limit = parseInt(req.query.limit, 10) || 50; // Default 50 per page
+    const offset = (page - 1) * limit;
+
     const where = {};
     if (status) where.status = status;
     if (service_type_id) where.service_type_id = service_type_id;
@@ -33,19 +37,36 @@ exports.getOrders = async (req, res) => {
     const includeCustomer = { model: Customer, attributes: ['name', 'phone'] };
     const includeService = { model: ServiceType, attributes: ['name', 'price_per_kg', 'unit', 'min_order'] };
 
-    let orders;
+    let result;
     if (search) {
       const customerSearch = await Customer.findAll({ where: { name: { [Op.iLike]: `%${search}%` } }, attributes: ['id'] });
       const customerIds = customerSearch.map(c => c.id);
-      orders = await Order.findAll({
+      result = await Order.findAndCountAll({
         where: { ...where, [Op.or]: [{ order_code: { [Op.iLike]: `%${search}%` } }, { customer_id: { [Op.in]: customerIds } }] },
         include: [includeCustomer, includeService],
-        order: [['created_at', 'DESC']]
+        order: [['created_at', 'DESC']],
+        limit,
+        offset
       });
     } else {
-      orders = await Order.findAll({ where, include: [includeCustomer, includeService], order: [['created_at', 'DESC']] });
+      result = await Order.findAndCountAll({
+        where, 
+        include: [includeCustomer, includeService], 
+        order: [['created_at', 'DESC']],
+        limit,
+        offset
+      });
     }
-    res.json({ success: true, orders });
+
+    res.json({
+      success: true,
+      data: {
+        orders: result.rows,
+        totalItems: result.count,
+        totalPages: Math.ceil(result.count / limit),
+        currentPage: page
+      }
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ success: false, message: 'Server error' });

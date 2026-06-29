@@ -31,7 +31,7 @@ exports.getOrders = async (req, res) => {
     }
 
     const includeCustomer = { model: Customer, attributes: ['name', 'phone'] };
-    const includeService = { model: ServiceType, attributes: ['name', 'price_per_kg'] };
+    const includeService = { model: ServiceType, attributes: ['name', 'price_per_kg', 'unit', 'min_order'] };
 
     let orders;
     if (search) {
@@ -58,7 +58,16 @@ exports.createOrder = async (req, res) => {
     const service = await ServiceType.findByPk(service_type_id);
     if (!service) return res.status(404).json({ success: false, message: 'Layanan tidak ditemukan' });
 
-    const total_price = parseFloat(weight_kg) * parseFloat(service.price_per_kg);
+    const qty = parseFloat(weight_kg); // bisa kg atau pcs tergantung unit layanan
+    const minOrder = parseFloat(service.min_order) || 1;
+    if (qty < minOrder) {
+      return res.status(400).json({
+        success: false,
+        message: `Minimal order untuk layanan ini adalah ${minOrder} ${service.unit}`
+      });
+    }
+
+    const total_price = qty * parseFloat(service.price_per_kg);
     const estDate = new Date();
     estDate.setDate(estDate.getDate() + service.est_days);
 
@@ -70,7 +79,7 @@ exports.createOrder = async (req, res) => {
     const order_code = await generateOrderCode();
     const order = await Order.create({
       order_code, customer_id: customer.id, service_type_id: service.id,
-      weight_kg, total_price, notes, est_finish_date: estDate,
+      weight_kg: qty, total_price, notes, est_finish_date: estDate,
       created_by: req.user.id, status: 'diterima'
     });
 

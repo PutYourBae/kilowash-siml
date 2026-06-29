@@ -11,8 +11,8 @@ exports.getServices = async (req, res) => {
 
 exports.createService = async (req, res) => {
   try {
-    const { name, price_per_kg, est_days } = req.body;
-    const service = await ServiceType.create({ name, price_per_kg, est_days });
+    const { name, price_per_kg, est_days, unit = 'kg', min_order = 1 } = req.body;
+    const service = await ServiceType.create({ name, price_per_kg, est_days, unit, min_order });
     res.status(201).json({ success: true, service });
   } catch (error) { res.status(500).json({ success: false, message: 'Server error' }); }
 };
@@ -21,7 +21,11 @@ exports.updateService = async (req, res) => {
   try {
     const service = await ServiceType.findByPk(req.params.id);
     if (!service) return res.status(404).json({ success: false, message: 'Layanan tidak ditemukan' });
-    await service.update(req.body);
+    const { name, price_per_kg, est_days, unit, min_order, is_active } = req.body;
+    const updateData = { name, price_per_kg, est_days, is_active };
+    if (unit) updateData.unit = unit;
+    if (min_order !== undefined) updateData.min_order = min_order;
+    await service.update(updateData);
     res.json({ success: true, service });
   } catch (error) { res.status(500).json({ success: false, message: 'Server error' }); }
 };

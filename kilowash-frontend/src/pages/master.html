@@ -36,7 +36,7 @@
             </div>
             <div class="table-wrapper">
               <table class="data-table">
-                <thead><tr><th>#</th><th>Nama Layanan</th><th>Harga / Kg</th><th>Estimasi Selesai</th><th>Status</th><th>Aksi</th></tr></thead>
+                <thead><tr><th>#</th><th>Nama Layanan</th><th>Harga / Satuan</th><th>Min Order</th><th>Estimasi Selesai</th><th>Status</th><th>Aksi</th></tr></thead>
                 <tbody id="serviceTable"><tr><td colspan="6" style="text-align:center;padding:30px;">Memuat...</td></tr></tbody>
               </table>
             </div>
@@ -73,16 +73,29 @@
         <input type="hidden" id="svcId">
         <div class="form-group">
           <label class="form-label">Nama Layanan *</label>
-          <input type="text" id="svcName" class="form-control" placeholder="Contoh: Reguler, Express">
+          <input type="text" id="svcName" class="form-control" placeholder="Contoh: Cuci Setrika Reguler">
         </div>
         <div class="form-row">
           <div class="form-group">
-            <label class="form-label">Harga per Kg (Rp) *</label>
+            <label class="form-label" id="svcPriceLabel">Harga per Kg (Rp) *</label>
             <input type="number" id="svcPrice" class="form-control" placeholder="8000">
           </div>
           <div class="form-group">
+            <label class="form-label">Satuan *</label>
+            <select id="svcUnit" class="form-control" onchange="updateSvcPriceLabel()">
+              <option value="kg">Per Kg</option>
+              <option value="pcs">Per Pcs</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Minimal Order *</label>
+            <input type="number" id="svcMin" class="form-control" step="0.5" min="1" placeholder="1">
+          </div>
+          <div class="form-group">
             <label class="form-label">Estimasi Selesai (Hari) *</label>
-            <input type="number" id="svcDays" class="form-control" placeholder="3">
+            <input type="number" id="svcDays" class="form-control" placeholder="2">
           </div>
         </div>
         <div class="form-group">
@@ -169,11 +182,12 @@
       const { ok, data } = await api('/master/services');
       const tbody = document.getElementById('serviceTable');
       if (!ok) { tbody.innerHTML = '<tr><td colspan="6">Gagal memuat</td></tr>'; return; }
-      tbody.innerHTML = data.services.map((s, i) => `
+        tbody.innerHTML = data.services.map((s, i) => `
         <tr>
           <td class="text-muted fs-13">${i+1}</td>
           <td class="fw-600">${s.name}</td>
-          <td>${formatRp(s.price_per_kg)} / Kg</td>
+          <td>${formatRp(s.price_per_kg)} / ${s.unit === 'pcs' ? 'Pcs' : 'Kg'}</td>
+          <td class="fs-13 text-muted">Min ${parseFloat(s.min_order || 1)} ${s.unit === 'pcs' ? 'pcs' : 'kg'}</td>
           <td>${s.est_days} Hari</td>
           <td><span class="badge ${s.is_active ? 'badge-success' : 'badge-diambil'}">${s.is_active ? 'Aktif' : 'Non-Aktif'}</span></td>
           <td><button class="btn btn-secondary btn-sm" onclick="openServiceModal(${JSON.stringify(s).replace(/"/g, '&quot;')})">Edit</button></td>
@@ -196,23 +210,33 @@
       `).join('');
     }
 
+    function updateSvcPriceLabel() {
+      const unit = document.getElementById('svcUnit').value;
+      document.getElementById('svcPriceLabel').textContent = unit === 'pcs' ? 'Harga per Pcs (Rp) *' : 'Harga per Kg (Rp) *';
+    }
+
     function openServiceModal(s = null) {
       document.getElementById('serviceModalTitle').textContent = s ? 'Edit Layanan' : 'Tambah Layanan';
       document.getElementById('svcId').value     = s?.id || '';
       document.getElementById('svcName').value   = s?.name || '';
       document.getElementById('svcPrice').value  = s?.price_per_kg || '';
+      document.getElementById('svcUnit').value   = s?.unit || 'kg';
+      document.getElementById('svcMin').value    = s?.min_order || 1;
       document.getElementById('svcDays').value   = s?.est_days || '';
       document.getElementById('svcActive').value = s ? String(s.is_active) : 'true';
+      updateSvcPriceLabel();
       openModal('serviceModal');
     }
 
     async function saveService() {
       const id = document.getElementById('svcId').value;
       const payload = {
-        name: document.getElementById('svcName').value.trim(),
+        name:         document.getElementById('svcName').value.trim(),
         price_per_kg: document.getElementById('svcPrice').value,
-        est_days: document.getElementById('svcDays').value,
-        is_active: document.getElementById('svcActive').value === 'true'
+        unit:         document.getElementById('svcUnit').value,
+        min_order:    document.getElementById('svcMin').value,
+        est_days:     document.getElementById('svcDays').value,
+        is_active:    document.getElementById('svcActive').value === 'true'
       };
       if (!payload.name || !payload.price_per_kg || !payload.est_days) { toast('Lengkapi semua field!', 'warning'); return; }
 

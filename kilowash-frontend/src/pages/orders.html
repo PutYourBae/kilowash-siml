@@ -98,8 +98,9 @@
             <select id="serviceType" class="form-control" required></select>
           </div>
           <div class="form-group">
-            <label class="form-label">Berat Cucian (Kg) *</label>
-            <input type="number" id="weightKg" class="form-control" step="0.1" min="0.5" placeholder="0.0" required>
+            <label class="form-label" id="weightLabel">Berat Cucian (Kg) *</label>
+            <input type="number" id="weightKg" class="form-control" step="0.1" min="1" placeholder="0.0" required>
+            <div class="fs-12 text-muted mt-4" id="minOrderHint" style="display:none;"></div>
           </div>
         </div>
         <div class="form-group">
@@ -236,7 +237,8 @@
         const filterSel = document.getElementById('filterService');
         filterSel.innerHTML = '<option value="">Semua Layanan</option>';
         services.forEach(s => {
-          sel.innerHTML += `<option value="${s.id}" data-price="${s.price_per_kg}">${s.name} (${formatRp(s.price_per_kg)}/Kg) · Est ${s.est_days} Hari</option>`;
+          const unitLabel = s.unit === 'pcs' ? 'pcs' : 'Kg';
+          sel.innerHTML += `<option value="${s.id}" data-price="${s.price_per_kg}" data-unit="${s.unit || 'kg'}" data-min="${s.min_order || 1}">${s.name} (${formatRp(s.price_per_kg)}/${unitLabel}) · Est ${s.est_days} Hari</option>`;
           filterSel.innerHTML += `<option value="${s.id}">${s.name}</option>`;
         });
       }
@@ -244,10 +246,28 @@
 
     function updatePricePreview() {
       const sel = document.getElementById('serviceType');
-      const weight = parseFloat(document.getElementById('weightKg').value) || 0;
       const opt = sel.options[sel.selectedIndex];
+      const unit = opt?.dataset?.unit || 'kg';
+      const min = parseFloat(opt?.dataset?.min || 1);
       const price = parseFloat(opt?.dataset?.price || 0);
-      const total = price * weight;
+      const qty = parseFloat(document.getElementById('weightKg').value) || 0;
+
+      // Update label dinamis
+      const lbl = unit === 'pcs' ? 'Jumlah (Pcs)' : 'Berat Cucian (Kg)';
+      document.getElementById('weightLabel').textContent = lbl + ' *';
+      document.getElementById('weightKg').placeholder = unit === 'pcs' ? '0 pcs' : '0.0';
+      document.getElementById('weightKg').step = unit === 'pcs' ? '1' : '0.1';
+
+      // Tampilkan hint minimal order
+      const hint = document.getElementById('minOrderHint');
+      if (opt?.value) {
+        hint.style.display = 'block';
+        hint.textContent = `Minimal order: ${min} ${unit === 'pcs' ? 'pcs' : 'Kg'}`;
+      } else {
+        hint.style.display = 'none';
+      }
+
+      const total = price * qty;
       document.getElementById('pricePreview').textContent = total > 0 ? formatRp(total) : '—';
     }
 

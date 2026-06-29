@@ -1,3 +1,6 @@
+// Force timezone to WIB (UTC+7) — must be FIRST before any Date() is called
+process.env.TZ = 'Asia/Jakarta';
+
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');

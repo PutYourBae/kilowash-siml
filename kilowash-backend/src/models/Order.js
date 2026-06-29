@@ -33,7 +33,7 @@ const Order = sequelize.define('Order', {
     allowNull: true
   },
   status: {
-    type: DataTypes.ENUM('diterima', 'proses', 'selesai', 'diambil'),
+    type: DataTypes.ENUM('diterima', 'proses', 'selesai', 'diambil', 'dibatalkan'),
     defaultValue: 'diterima'
   },
   est_finish_date: {

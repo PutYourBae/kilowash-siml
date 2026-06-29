@@ -94,7 +94,7 @@
     let chart;
 
     document.addEventListener('DOMContentLoaded', () => {
-      requireAuth(['owner']);
+      requireAuth(['owner', 'admin']);
 
       const months = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
       const mSel = document.getElementById('selMonth');

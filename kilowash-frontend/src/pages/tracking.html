@@ -281,8 +281,8 @@
     <a href="login.html">Login Staff →</a>
   </div>
 
+  <script src="../js/config.js"></script>
   <script>
-    const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://' + window.location.hostname + ':3000/api' : 'https://kilowash-siml.vercel.app/api';
     const statusConfig = {
       diterima:  { label: 'Diterima',  desc: 'Pesanan diterima & menunggu antrian cuci.',          pill: 'sp-diterima' },
       proses:    { label: 'Proses',    desc: 'Pakaian sedang dalam proses pencucian & penyetrikaan.', pill: 'sp-proses' },
@@ -302,7 +302,7 @@
       btn.textContent = '⏳'; btn.disabled = true;
 
       try {
-        const res = await fetch(`${API_BASE}/track/${encodeURIComponent(code)}`);
+        const res = await fetch(`${CONFIG.API_BASE}/track/${encodeURIComponent(code)}`);
         const data = await res.json();
 
         if (res.ok && data.success) {

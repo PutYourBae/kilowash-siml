@@ -66,6 +66,15 @@ const getUser = () => {
   return u ? JSON.parse(u) : null;
 };
 
+// Redirect ke halaman pertama sesuai role
+const getHomePageForRole = (role) => {
+  if (role === 'owner') return 'dashboard.html';
+  if (role === 'admin') return 'orders.html';
+  if (role === 'kasir') return 'payments.html';
+  if (role === 'petugas') return 'queue.html';
+  return 'login.html';
+};
+
 const requireAuth = (allowedRoles = null) => {
   const token = localStorage.getItem('kw_token');
   const user = getUser();
@@ -74,7 +83,8 @@ const requireAuth = (allowedRoles = null) => {
     return null;
   }
   if (allowedRoles && !allowedRoles.includes(user.role)) {
-    window.location.href = 'dashboard.html';
+    // Redirect ke halaman home sesuai role, bukan dashboard (untuk hindari infinite loop)
+    window.location.href = getHomePageForRole(user.role);
     return null;
   }
   return user;

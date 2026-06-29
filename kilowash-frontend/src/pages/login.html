@@ -320,7 +320,22 @@
   <script>
     const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://' + window.location.hostname + ':3000/api' : 'https://kilowash-siml.vercel.app/api';
 
-    if (localStorage.getItem('kw_token')) window.location.href = 'dashboard.html';
+    const getHomePageForRole = (role) => {
+      if (role === 'owner') return 'dashboard.html';
+      if (role === 'admin') return 'orders.html';
+      if (role === 'kasir') return 'payments.html';
+      if (role === 'petugas') return 'queue.html';
+      return null;
+    };
+
+    // Jika sudah login, langsung ke halaman home sesuai role
+    const _existingToken = localStorage.getItem('kw_token');
+    const _existingUser = localStorage.getItem('kw_user');
+    if (_existingToken && _existingUser) {
+      const _role = JSON.parse(_existingUser).role;
+      const _home = getHomePageForRole(_role);
+      if (_home) window.location.href = _home;
+    }
 
     document.getElementById('togglePw').addEventListener('click', function() {
       const pw = document.getElementById('password');
@@ -355,9 +370,8 @@
           btn.style.background = '#10B981';
 
           const user = data.user;
-          if (user.role === 'petugas') window.location.href = 'queue.html';
-          else if (user.role === 'kasir') window.location.href = 'orders.html';
-          else window.location.href = 'dashboard.html';
+          const home = getHomePageForRole(user.role) || 'orders.html';
+          window.location.href = home;
         } else {
           throw new Error(data.message || 'Email atau password salah');
         }

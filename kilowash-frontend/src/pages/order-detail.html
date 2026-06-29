@@ -86,13 +86,13 @@
         return;
       }
       
-      const { ok, data } = await api(`/track/${code}`);
-      if (!ok || !data.success) {
+      const { ok, data } = await api(`/orders?search=${code}`);
+      if (!ok || !data.success || data.data.orders.length === 0) {
         toast('Order tidak ditemukan', 'error');
         return;
       }
       
-      const order = data.order;
+      const order = data.data.orders[0];
       
       document.getElementById('detailOrderCode').textContent = order.order_code;
       document.getElementById('detailDate').textContent = new Date(order.created_at).toLocaleString('id-ID');

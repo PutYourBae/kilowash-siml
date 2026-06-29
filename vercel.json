@@ -1,0 +1,19 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "kilowash-backend/app.js",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "/kilowash-backend/app.js"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/kilowash-backend/app.js"
+    }
+  ]
+}

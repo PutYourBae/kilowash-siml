@@ -123,11 +123,13 @@ class AppSidebar extends HTMLElement {
           ${nav('payments.html', '💳', 'Kasir & Pembayaran', ['owner', 'admin', 'kasir'])}
         </div>
 
+        ${user.role === 'owner' ? `
         <div class="sidebar-section">
           <div class="sidebar-section-label">Laporan & Master</div>
           ${nav('reports.html', '📈', 'Laporan', ['owner'])}
           ${nav('master.html', '⚙️', 'Data Master', ['owner'])}
         </div>
+        ` : ''}
 
         <div class="sidebar-footer">
           <div class="user-card">

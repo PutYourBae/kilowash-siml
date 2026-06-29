@@ -207,3 +207,6 @@ function setupSidebar() {
     topbar.insertBefore(btn, topbar.firstChild);
   });
 }
+
+// Auto-inject hamburger di setiap halaman yang pakai app.js
+document.addEventListener('DOMContentLoaded', () => setupSidebar());

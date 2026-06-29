@@ -180,7 +180,7 @@
       const year  = document.getElementById('selYear').value;
       const token = localStorage.getItem('kw_token');
       const a = document.createElement('a');
-      a.href = `http://localhost:3000/api/reports/export?month=${month}&year=${year}`;
+      a.href = `${API_BASE_URL}/reports/export?month=${month}&year=${year}`;
       a.setAttribute('download', '');
       // Add auth header workaround via fetch
       const res = await fetch(a.href, { headers: { Authorization: `Bearer ${token}` } });

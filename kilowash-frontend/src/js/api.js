@@ -1,5 +1,6 @@
-// Konfigurasi API
-const API_BASE_URL = 'http://' + window.location.hostname + ':3000/api';
+const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+  ? 'http://' + window.location.hostname + ':3000/api'
+  : 'https://kilowash-siml.vercel.app/api';
 
 // Wrapper fetch untuk mempermudah panggil backend
 const apiCall = async (endpoint, method = 'GET', body = null) => {

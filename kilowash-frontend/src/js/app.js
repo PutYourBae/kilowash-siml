@@ -69,7 +69,7 @@ const getUser = () => {
 // Redirect ke halaman pertama sesuai role
 const getHomePageForRole = (role) => {
   if (role === 'owner') return 'dashboard.html';
-  if (role === 'admin') return 'orders.html';
+  if (role === 'admin') return 'dashboard.html';
   if (role === 'kasir') return 'payments.html';
   if (role === 'petugas') return 'queue.html';
   return 'login.html';
@@ -127,7 +127,7 @@ class AppSidebar extends HTMLElement {
 
         <div class="sidebar-section">
           <div class="sidebar-section-label">Menu Utama</div>
-          ${nav('dashboard.html', '📊', 'Dashboard', ['owner'])}
+          ${nav('dashboard.html', '📊', 'Dashboard', ['owner', 'admin'])}
           ${nav('orders.html', '📋', 'Daftar Order', ['owner', 'admin', 'kasir'])}
           ${nav('queue.html', '🔄', 'Antrian Laundry', ['owner', 'admin', 'petugas'])}
           ${nav('payments.html', '💳', 'Kasir & Pembayaran', ['owner', 'admin', 'kasir'])}

@@ -1,10 +1,10 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-const sequelize = require('../src/config/database');
+const sequelize = require('./src/config/database');
 
 // Import models agar terdaftar
-require('../src/models/index');
+require('./src/models/index');
 
 const app = express();
 
@@ -13,13 +13,13 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Import Routes
-const authRoutes = require('../src/routes/auth');
-const masterRoutes = require('../src/routes/master');
-const orderRoutes = require('../src/routes/orders');
-const trackRoutes = require('../src/routes/track');
-const paymentRoutes = require('../src/routes/payments');
-const reportRoutes = require('../src/routes/reports');
-const notificationRoutes = require('../src/routes/notifications');
+const authRoutes = require('./src/routes/auth');
+const masterRoutes = require('./src/routes/master');
+const orderRoutes = require('./src/routes/orders');
+const trackRoutes = require('./src/routes/track');
+const paymentRoutes = require('./src/routes/payments');
+const reportRoutes = require('./src/routes/reports');
+const notificationRoutes = require('./src/routes/notifications');
 
 // Setup Routes
 app.use('/api/auth', authRoutes);

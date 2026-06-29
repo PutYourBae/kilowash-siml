@@ -107,11 +107,12 @@ exports.exportCSV = async (req, res) => {
       include: [{ model: Order, include: [{ model: Customer }, { model: ServiceType }] }]
     });
 
-    let csv = 'Kode Order,Pelanggan,Layanan,Berat (Kg),Total,Metode Bayar,Tanggal Bayar\n';
+    let csv = '\uFEFFKode Order;Pelanggan;Layanan;Berat (Kg/Pcs);Total;Metode Bayar;Tanggal Bayar\n';
     payments.forEach(p => {
       const o      = p.Order;
       const tgl    = new Date(p.paid_at).toLocaleDateString('id-ID', { timeZone: 'Asia/Jakarta' });
-      csv += `${o.order_code},${o.Customer.name},${o.ServiceType.name},${o.weight_kg},${o.total_price},${p.payment_method},${tgl}\n`;
+      const unit   = o.ServiceType?.unit === 'pcs' ? 'Pcs' : 'Kg';
+      csv += `${o.order_code};"${o.Customer.name}";"${o.ServiceType.name}";"${o.weight_kg} ${unit}";${o.total_price};${p.payment_method};${tgl}\n`;
     });
 
     res.setHeader('Content-Type', 'text/csv');

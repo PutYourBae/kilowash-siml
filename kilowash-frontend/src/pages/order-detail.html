@@ -109,7 +109,7 @@
       const unit = order.ServiceType?.unit === 'pcs' ? 'Pcs' : 'Kg';
       document.getElementById('detailWeight').textContent = `${order.weight_kg} ${unit}`;
       
-      const est = new Date(order.estimated_completion);
+      const est = new Date(order.est_finish_date);
       document.getElementById('detailEst').textContent = est.toLocaleDateString('id-ID');
       
       document.getElementById('detailTotal').textContent = formatRp(order.total_price);

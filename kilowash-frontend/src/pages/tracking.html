@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lacak Cucian | KiloWash</title>
+  <meta name="description" content="Cek status cucian Anda secara real-time menggunakan kode order KiloWash">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #0D1B2A;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 40px 20px 80px;
+      color: #0F172A;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Header */
+    .track-header {
+      text-align: center;
+      margin-bottom: 36px;
+    }
+
+    .track-logo {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .track-logo-icon {
+      width: 48px; height: 48px;
+      background: linear-gradient(135deg, #12B886, #0CA678);
+      border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 24px;
+      box-shadow: 0 8px 20px rgba(18,184,134,0.4);
+    }
+
+    .track-logo-text h1 { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 22px; font-weight: 700; color: white; }
+    .track-logo-text p  { font-size: 12px; color: rgba(255,255,255,0.5); }
+
+    .track-headline { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 32px; font-weight: 800; color: white; margin-bottom: 10px; }
+    .track-sub { font-size: 15px; color: rgba(255,255,255,0.5); }
+
+    /* Search Box */
+    .search-card {
+      background: white;
+      border-radius: 20px;
+      padding: 32px;
+      width: 100%;
+      max-width: 560px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      margin-bottom: 24px;
+    }
+
+    .search-card label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: #475569;
+      margin-bottom: 8px;
+    }
+
+    .search-row {
+      display: flex;
+      gap: 12px;
+    }
+
+    .search-input {
+      flex: 1;
+      padding: 13px 16px;
+      border: 1.5px solid #E2E8F0;
+      border-radius: 10px;
+      font-size: 14px;
+      font-family: 'Inter', sans-serif;
+      outline: none;
+      color: #0F172A;
+      transition: border-color .2s, box-shadow .2s;
+    }
+
+    .search-input:focus { border-color: #12B886; box-shadow: 0 0 0 3px rgba(18,184,134,0.12); }
+
+    .btn-track {
+      padding: 13px 24px;
+      background: #12B886;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background .2s;
+      box-shadow: 0 4px 14px rgba(18,184,134,0.35);
+    }
+
+    .btn-track:hover { background: #0CA678; }
+    .btn-track:disabled { background: #94A3B8; cursor: not-allowed; }
+
+    /* Result Card */
+    .result-card {
+      background: white;
+      border-radius: 20px;
+      padding: 0;
+      width: 100%;
+      max-width: 560px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+      display: none;
+      overflow: hidden;
+    }
+
+    .result-top {
+      background: linear-gradient(135deg, #0D1B2A, #1a3a4a);
+      padding: 24px;
+      color: white;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .result-code { font-family: 'Courier New', monospace; font-size: 18px; font-weight: 700; color: #12B886; }
+    .result-name { font-size: 15px; font-weight: 600; margin-top: 4px; }
+    .result-meta { font-size: 12px; color: rgba(255,255,255,0.5); margin-top: 2px; }
+
+    .status-pill {
+      padding: 8px 18px;
+      border-radius: 9999px;
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: capitalize;
+    }
+
+    .sp-diterima { background: rgba(59,130,246,0.15); color: #93C5FD; }
+    .sp-proses   { background: rgba(245,158,11,0.15); color: #FCD34D; }
+    .sp-selesai  { background: rgba(16,185,129,0.15); color: #6EE7B7; }
+    .sp-diambil  { background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.6); }
+
+    .result-body { padding: 28px; }
+
+    .est-row {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .est-box {
+      flex: 1;
+      background: #F0F4F8;
+      border-radius: 12px;
+      padding: 14px 16px;
+    }
+
+    .est-label { font-size: 11px; color: #94A3B8; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
+    .est-value { font-size: 14px; font-weight: 700; color: #0F172A; }
+
+    /* Timeline */
+    .timeline-title { font-size: 12px; font-weight: 600; color: #94A3B8; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 20px; }
+
+    .track-steps {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      position: relative;
+      padding-left: 32px;
+    }
+
+    .track-steps::before {
+      content: '';
+      position: absolute;
+      left: 10px;
+      top: 14px;
+      bottom: 14px;
+      width: 2px;
+      background: #E2E8F0;
+    }
+
+    .track-step {
+      position: relative;
+      padding-bottom: 24px;
+    }
+
+    .track-step:last-child { padding-bottom: 0; }
+
+    .step-dot {
+      position: absolute;
+      left: -24px;
+      top: 3px;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: #E2E8F0;
+      border: 3px solid white;
+      box-shadow: 0 0 0 2px #E2E8F0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 9px;
+    }
+
+    .step-dot.done { background: #12B886; box-shadow: 0 0 0 3px rgba(18,184,134,0.2); }
+    .step-dot.current { background: #FF6B35; box-shadow: 0 0 0 4px rgba(255,107,53,0.2); animation: pulse 1.5s infinite; }
+
+    @keyframes pulse {
+      0%,100% { box-shadow: 0 0 0 4px rgba(255,107,53,0.2); }
+      50%      { box-shadow: 0 0 0 8px rgba(255,107,53,0.05); }
+    }
+
+    .step-title { font-size: 14px; font-weight: 700; color: #0F172A; text-transform: capitalize; margin-bottom: 3px; }
+    .step-title.inactive { color: #CBD5E1; }
+    .step-desc  { font-size: 12px; color: #94A3B8; line-height: 1.5; }
+    .step-time  { font-size: 11px; color: #94A3B8; margin-top: 3px; font-style: italic; }
+
+    .footer-note { margin-top: 24px; text-align: center; font-size: 12px; color: rgba(255,255,255,0.35); }
+    .footer-note a { color: rgba(18,184,134,0.7); }
+
+    @media (max-width: 600px) {
+      .track-headline { font-size: 24px; }
+      .search-row { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+  <div class="track-header">
+    <div class="track-logo">
+      <div class="track-logo-icon">🧺</div>
+      <div class="track-logo-text">
+        <h1>KiloWash</h1>
+        <p>Manajemen Laundry Digital</p>
+      </div>
+    </div>
+    <h2 class="track-headline">Lacak Cucian Anda</h2>
+    <p class="track-sub">Masukkan kode pesanan untuk melihat status real-time</p>
+  </div>
+
+  <div class="search-card">
+    <label for="codeInput">🔍 Kode Pesanan</label>
+    <div class="search-row">
+      <input type="text" id="codeInput" class="search-input" placeholder="Contoh: KW-20260630-0001" autocomplete="off" autofocus>
+      <button class="btn-track" id="btnTrack">Lacak</button>
+    </div>
+  </div>
+
+  <div class="result-card" id="resultCard">
+    <div class="result-top">
+      <div>
+        <div class="result-code" id="resCode">—</div>
+        <div class="result-name" id="resName">—</div>
+        <div class="result-meta" id="resMeta">—</div>
+      </div>
+      <div class="status-pill" id="resStatusPill">—</div>
+    </div>
+    <div class="result-body">
+      <div class="est-row">
+        <div class="est-box">
+          <div class="est-label">Estimasi Selesai</div>
+          <div class="est-value" id="resEst">—</div>
+        </div>
+        <div class="est-box">
+          <div class="est-label">Total Tagihan</div>
+          <div class="est-value" id="resTotal">—</div>
+        </div>
+      </div>
+
+      <div class="timeline-title">Riwayat Status</div>
+      <div class="track-steps" id="trackSteps"></div>
+    </div>
+  </div>
+
+  <div class="footer-note">
+    Cucian sudah selesai? Hubungi kami atau kunjungi outlet langsung. &nbsp;·&nbsp;
+    <a href="login.html">Login Staff →</a>
+  </div>
+
+  <script>
+    const API_BASE = 'http://' + window.location.hostname + ':3000/api';
+    const statusConfig = {
+      diterima:  { label: 'Diterima',  desc: 'Pesanan diterima & menunggu antrian cuci.',          pill: 'sp-diterima' },
+      proses:    { label: 'Proses',    desc: 'Pakaian sedang dalam proses pencucian & penyetrikaan.', pill: 'sp-proses' },
+      selesai:   { label: 'Selesai',   desc: 'Cucian siap! Silakan diambil di outlet KiloWash.',    pill: 'sp-selesai' },
+      diambil:   { label: 'Diambil',   desc: 'Cucian sudah diambil. Terima kasih! 🙏',             pill: 'sp-diambil' },
+    };
+    const allStatuses = ['diterima', 'proses', 'selesai', 'diambil'];
+
+    document.getElementById('btnTrack').addEventListener('click', doTrack);
+    document.getElementById('codeInput').addEventListener('keydown', e => { if (e.key === 'Enter') doTrack(); });
+
+    async function doTrack() {
+      const code = document.getElementById('codeInput').value.trim();
+      if (!code) return;
+
+      const btn = document.getElementById('btnTrack');
+      btn.textContent = '⏳'; btn.disabled = true;
+
+      try {
+        const res = await fetch(`${API_BASE}/track/${encodeURIComponent(code)}`);
+        const data = await res.json();
+
+        if (res.ok && data.success) {
+          renderResult(data.data);
+        } else {
+          alert(data.message || 'Kode pesanan tidak ditemukan. Pastikan kode yang Anda masukkan benar.');
+        }
+      } catch {
+        alert('Tidak dapat terhubung ke server. Pastikan server sedang berjalan.');
+      } finally {
+        btn.textContent = 'Lacak'; btn.disabled = false;
+      }
+    }
+
+    function renderResult(d) {
+      document.getElementById('resCode').textContent = d.order_code;
+      document.getElementById('resName').textContent = d.customer_name;
+      document.getElementById('resMeta').textContent = `${d.service_name} · ${d.weight_kg} Kg`;
+      document.getElementById('resTotal').textContent = new Intl.NumberFormat('id-ID', {style:'currency',currency:'IDR',minimumFractionDigits:0}).format(d.total_price);
+      document.getElementById('resEst').textContent  = new Date(d.est_finish_date).toLocaleDateString('id-ID', {weekday:'short',day:'numeric',month:'short',year:'numeric'});
+
+      const cfg = statusConfig[d.status] || { pill: '' };
+      const pill = document.getElementById('resStatusPill');
+      pill.textContent = cfg.label || d.status;
+      pill.className = 'status-pill ' + cfg.pill;
+
+      const curIdx = allStatuses.indexOf(d.status);
+      const logsMap = {};
+      (d.logs || []).forEach(l => { logsMap[l.new_status] = l; });
+
+      const stepsHtml = allStatuses.map((s, i) => {
+        const sCfg  = statusConfig[s];
+        const isDone = i < curIdx;
+        const isCur  = i === curIdx;
+        const log    = logsMap[s];
+
+        const dotClass = isDone ? 'done' : (isCur ? 'current' : '');
+        const dotInner = isDone ? '✓' : (isCur ? '●' : '');
+        const titleClass = !isDone && !isCur ? 'inactive' : '';
+        const timeStr = log ? new Date(log.changed_at || log.createdAt).toLocaleString('id-ID', {day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}) : '';
+
+        return `
+          <div class="track-step">
+            <div class="step-dot ${dotClass}">${dotInner}</div>
+            <div class="step-title ${titleClass}">${sCfg.label}</div>
+            <div class="step-desc">${sCfg.desc}</div>
+            ${timeStr ? `<div class="step-time">${timeStr}</div>` : ''}
+          </div>
+        `;
+      }).join('');
+
+      document.getElementById('trackSteps').innerHTML = stepsHtml;
+      document.getElementById('resultCard').style.display = 'block';
+      document.getElementById('resultCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  </script>
+</body>
+</html>

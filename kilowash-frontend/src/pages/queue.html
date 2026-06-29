@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Antrian Laundry | KiloWash</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap">
+  <link rel="stylesheet" href="../styles/app.css">
+</head>
+<body>
+  <div class="app-layout">
+    <app-sidebar></app-sidebar>
+    <div class="main-content">
+      <div class="topbar">
+        <div class="topbar-title">
+          <h1>Antrian Laundry</h1>
+          <p>Update status cucian secara real-time</p>
+        </div>
+        <div class="topbar-actions">
+          <button class="btn btn-secondary btn-sm" id="refreshBtn">⟳ Refresh</button>
+        </div>
+      </div>
+
+      <div class="page-body">
+        <div class="kanban-board" id="kanbanBoard">
+          <!-- Col: Diterima -->
+          <div class="kanban-col">
+            <div class="kanban-col-header">
+              <div class="kanban-col-title">
+                <span style="color:var(--status-diterima)">●</span>
+                Diterima
+              </div>
+              <span class="kanban-count" id="count-diterima">0</span>
+            </div>
+            <div class="kanban-col-body" id="col-diterima">
+              <div class="empty-state"><div class="empty-icon">📥</div><h4 class="fs-13">Tidak ada antrian</h4></div>
+            </div>
+          </div>
+
+          <!-- Col: Proses -->
+          <div class="kanban-col">
+            <div class="kanban-col-header">
+              <div class="kanban-col-title">
+                <span style="color:var(--status-proses)">●</span>
+                Proses (Dicuci / Setrika)
+              </div>
+              <span class="kanban-count" id="count-proses">0</span>
+            </div>
+            <div class="kanban-col-body" id="col-proses">
+              <div class="empty-state"><div class="empty-icon">🫧</div><h4 class="fs-13">Tidak ada yang diproses</h4></div>
+            </div>
+          </div>
+
+          <!-- Col: Selesai -->
+          <div class="kanban-col">
+            <div class="kanban-col-header">
+              <div class="kanban-col-title">
+                <span style="color:var(--status-selesai)">●</span>
+                Selesai (Siap Diambil)
+              </div>
+              <span class="kanban-count" id="count-selesai">0</span>
+            </div>
+            <div class="kanban-col-body" id="col-selesai">
+              <div class="empty-state"><div class="empty-icon">✅</div><h4 class="fs-13">Belum ada yang selesai</h4></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="../js/app.js"></script>
+  <script>
+    let isUpdating = false;
+
+    document.addEventListener('DOMContentLoaded', () => {
+      requireAuth();
+      loadKanban();
+      document.getElementById('refreshBtn').addEventListener('click', loadKanban);
+
+      // Auto-refresh every 60s
+      setInterval(loadKanban, 60000);
+    });
+
+    async function loadKanban() {
+      const { ok, data } = await api('/orders?status=diterima');
+      const { ok: ok2, data: d2 } = await api('/orders?status=proses');
+      const { ok: ok3, data: d3 } = await api('/orders?status=selesai');
+
+      const allOrders = [
+        ...(ok && data.success ? data.orders : []),
+        ...(ok2 && d2.success ? d2.orders : []),
+        ...(ok3 && d3.success ? d3.orders : []),
+      ];
+
+      const cols = { diterima: [], proses: [], selesai: [] };
+      allOrders.forEach(o => { if (cols[o.status]) cols[o.status].push(o); });
+
+      Object.entries(cols).forEach(([status, orders]) => {
+        const col = document.getElementById(`col-${status}`);
+        document.getElementById(`count-${status}`).textContent = orders.length;
+
+        if (orders.length === 0) {
+          const emptyMsg = { diterima: '📥 Tidak ada antrian', proses: '🫧 Tidak ada yang diproses', selesai: '✅ Belum ada yang selesai' };
+          col.innerHTML = `<div class="empty-state"><div class="empty-icon" style="font-size:32px;">${emptyMsg[status].split(' ')[0]}</div><h4 class="fs-13">${emptyMsg[status].slice(2)}</h4></div>`;
+          return;
+        }
+
+        col.innerHTML = orders.map(o => `
+          <div class="kanban-card">
+            <div class="kanban-card-code">${o.order_code}</div>
+            <div class="kanban-card-name">${o.Customer?.name || '—'}</div>
+            <div class="kanban-card-meta">
+              ${o.ServiceType?.name || '—'} · <strong>${o.weight_kg} Kg</strong> · ${formatRp(o.total_price)}
+            </div>
+            <div class="fs-12 text-muted mb-8">Est: ${o.est_finish_date ? formatDate(o.est_finish_date) : '—'}</div>
+            <div class="kanban-card-actions">
+              ${status === 'diterima' ? `<button class="btn btn-primary btn-sm w-100" onclick="updateStatus(${o.id}, 'proses', this)">▶ Mulai Proses</button>` : ''}
+              ${status === 'proses' ? `<button class="btn btn-sm w-100" style="background:#ECFDF5;color:#059669;border:1px solid #A7F3D0;font-weight:700;" onclick="updateStatus(${o.id}, 'selesai', this)">✓ Tandai Selesai</button>` : ''}
+              ${status === 'selesai' ? `<div class="badge badge-selesai w-100" style="justify-content:center;">Menunggu Diambil</div>` : ''}
+            </div>
+          </div>
+        `).join('');
+      });
+    }
+
+    async function updateStatus(id, newStatus, btn) {
+      if (isUpdating) return;
+      isUpdating = true;
+      const orig = btn.textContent;
+      btn.disabled = true;
+      btn.textContent = '⏳ Memproses...';
+
+      const { ok, data } = await api(`/orders/${id}/status`, 'PATCH', { status: newStatus });
+      isUpdating = false;
+
+      if (ok) {
+        toast(`Status berhasil diubah ke "${statusLabel[newStatus]}"` + (newStatus === 'selesai' ? ' 📲 Notifikasi WA dikirim' : ''), 'success');
+        loadKanban();
+      } else {
+        toast(data.message || 'Gagal update status', 'error');
+        btn.disabled = false;
+        btn.textContent = orig;
+      }
+    }
+  </script>
+</body>
+</html>

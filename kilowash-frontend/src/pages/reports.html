@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Laporan | KiloWash</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap">
+  <link rel="stylesheet" href="../styles/app.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <div class="app-layout">
+    <app-sidebar></app-sidebar>
+    <div class="main-content">
+      <div class="topbar">
+        <div class="topbar-title">
+          <h1>Laporan Keuangan</h1>
+          <p>Pantau pendapatan harian dan bulanan</p>
+        </div>
+        <div class="topbar-actions">
+          <button class="btn btn-secondary btn-sm" id="btnExport">⬇ Export CSV</button>
+        </div>
+      </div>
+
+      <div class="page-body">
+        <!-- Filter -->
+        <div class="card mb-16" style="padding:16px 20px;">
+          <div class="d-flex gap-12 align-center">
+            <span class="fs-13 fw-600 text-secondary">Periode:</span>
+            <select id="selMonth" class="form-control" style="width:auto;"></select>
+            <select id="selYear" class="form-control" style="width:auto;"></select>
+            <button class="btn btn-primary btn-sm" id="btnLoad">Tampilkan</button>
+          </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:20px;">
+          <div class="stat-card s-green">
+            <div class="stat-card-inner">
+              <div class="stat-icon green">💰</div>
+              <div class="stat-value fs-20" id="r-revenue">—</div>
+              <div class="stat-label">Total Pendapatan</div>
+            </div>
+          </div>
+          <div class="stat-card s-blue">
+            <div class="stat-card-inner">
+              <div class="stat-icon blue">📋</div>
+              <div class="stat-value" id="r-orders">—</div>
+              <div class="stat-label">Total Transaksi</div>
+            </div>
+          </div>
+          <div class="stat-card s-amber">
+            <div class="stat-card-inner">
+              <div class="stat-icon amber">📅</div>
+              <div class="stat-value fs-20" id="r-avgDay">—</div>
+              <div class="stat-label">Rata-rata / Hari</div>
+            </div>
+          </div>
+          <div class="stat-card s-rose">
+            <div class="stat-card-inner">
+              <div class="stat-icon rose">📊</div>
+              <div class="stat-value fs-20" id="r-avgOrder">—</div>
+              <div class="stat-label">Rata-rata / Transaksi</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Chart -->
+        <div class="card mb-20">
+          <div class="card-header">
+            <h3>📈 Grafik Pendapatan Harian</h3>
+          </div>
+          <div class="card-body" style="height:300px;position:relative;">
+            <canvas id="reportChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Breakdown per service -->
+        <div class="card">
+          <div class="card-header"><h3>💼 Breakdown per Layanan (Bulan Ini)</h3></div>
+          <div class="card-body" id="serviceBreakdown">
+            <p class="text-muted fs-13">Pilih periode lalu klik Tampilkan</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="../js/app.js"></script>
+  <script>
+    let chart;
+
+    document.addEventListener('DOMContentLoaded', () => {
+      requireAuth(['owner', 'admin']);
+
+      const months = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+      const mSel = document.getElementById('selMonth');
+      const ySel = document.getElementById('selYear');
+      const curM = new Date().getMonth();
+      const curY = new Date().getFullYear();
+
+      months.forEach((m, i) => mSel.innerHTML += `<option value="${i+1}" ${i===curM?'selected':''}>${m}</option>`);
+      for (let y = curY; y >= curY-3; y--) ySel.innerHTML += `<option value="${y}" ${y===curY?'selected':''}>${y}</option>`;
+
+      loadReport();
+      document.getElementById('btnLoad').addEventListener('click', loadReport);
+      document.getElementById('btnExport').addEventListener('click', exportCSV);
+    });
+
+    async function loadReport() {
+      const month = document.getElementById('selMonth').value;
+      const year  = document.getElementById('selYear').value;
+
+      const { ok, data } = await api(`/reports/monthly?month=${month}&year=${year}`);
+      if (!ok || !data.success) { toast('Gagal memuat laporan', 'error'); return; }
+
+      const d = data.data;
+      const avgOrder = d.total_orders > 0 ? d.total_revenue / d.total_orders : 0;
+
+      document.getElementById('r-revenue').textContent  = formatRp(d.total_revenue);
+      document.getElementById('r-orders').textContent   = d.total_orders;
+      document.getElementById('r-avgDay').textContent   = formatRp(d.avg_per_day);
+      document.getElementById('r-avgOrder').textContent = formatRp(avgOrder);
+
+      // Chart
+      const labels   = d.chart.map(x => x.date.slice(8));
+      const revenues = d.chart.map(x => x.revenue);
+      const ctx = document.getElementById('reportChart').getContext('2d');
+      if (chart) chart.destroy();
+      chart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels,
+          datasets: [{
+            label: 'Pendapatan',
+            data: revenues,
+            borderColor: '#12B886',
+            backgroundColor: 'rgba(18,184,134,0.08)',
+            fill: true,
+            tension: 0.4,
+            pointRadius: 4,
+            pointBackgroundColor: '#12B886',
+            pointBorderColor: 'white',
+            pointBorderWidth: 2,
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ' ' + formatRp(ctx.raw) } } },
+          scales: {
+            x: { grid: { display: false }, ticks: { font: { size: 11 }, color: '#94A3B8' } },
+            y: {
+              grid: { color: '#F1F5F9' },
+              ticks: { font: { size: 11 }, color: '#94A3B8', callback: v => v >= 1000000 ? (v/1000000).toFixed(1)+'jt' : (v/1000).toFixed(0)+'rb' }
+            }
+          }
+        }
+      });
+
+      // Daily stats also load today's breakdown
+      const { ok: ok2, data: d2 } = await api('/reports/daily');
+      const bd = document.getElementById('serviceBreakdown');
+      if (ok2 && d2.success) {
+        const entries = Object.entries(d2.data.breakdown);
+        if (entries.length === 0) { bd.innerHTML = '<p class="text-muted fs-13">Belum ada data transaksi hari ini.</p>'; return; }
+        bd.innerHTML = `
+          <table class="data-table">
+            <thead><tr><th>Jenis Layanan</th><th>Jumlah Transaksi</th><th>Total Pendapatan</th></tr></thead>
+            <tbody>
+              ${entries.map(([n, i]) => `<tr><td class="fw-600">${n}</td><td>${i.count} transaksi</td><td class="fw-700" style="color:var(--brand-primary);">${formatRp(i.revenue)}</td></tr>`).join('')}
+            </tbody>
+          </table>
+        `;
+      }
+    }
+
+    async function exportCSV() {
+      const month = document.getElementById('selMonth').value;
+      const year  = document.getElementById('selYear').value;
+      const token = localStorage.getItem('kw_token');
+      const a = document.createElement('a');
+      a.href = `http://localhost:3000/api/reports/export?month=${month}&year=${year}`;
+      a.setAttribute('download', '');
+      // Add auth header workaround via fetch
+      const res = await fetch(a.href, { headers: { Authorization: `Bearer ${token}` } });
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      a.href = url;
+      a.download = `laporan-${year}-${String(month).padStart(2,'0')}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+      toast('File CSV berhasil diunduh!', 'success');
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Daftar Order | KiloWash</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap">
+  <link rel="stylesheet" href="../styles/app.css">
+</head>
+<body>
+  <div class="app-layout">
+    <app-sidebar></app-sidebar>
+    <div class="main-content">
+      <div class="topbar">
+        <div class="topbar-title">
+          <h1>Daftar Order</h1>
+          <p>Kelola semua pesanan laundry</p>
+        </div>
+        <div class="topbar-actions">
+          <button class="btn btn-primary" id="btnNewOrder">+ Order Baru</button>
+        </div>
+      </div>
+
+      <div class="page-body">
+        <!-- Filter Bar -->
+        <div class="card mb-16" style="padding:16px 20px;">
+          <div class="filter-bar">
+            <div class="search-wrap">
+              <span class="search-icon">🔍</span>
+              <input type="text" id="searchInput" class="form-control" placeholder="Cari kode order atau nama pelanggan...">
+            </div>
+            <select id="filterStatus" class="form-control" style="width:auto;min-width:150px;">
+              <option value="">Semua Status</option>
+              <option value="diterima">Diterima</option>
+              <option value="proses">Proses</option>
+              <option value="selesai">Selesai</option>
+              <option value="diambil">Diambil</option>
+              <option value="dibatalkan">Dibatalkan</option>
+            </select>
+            <select id="filterService" class="form-control" style="width:auto;min-width:140px;">
+              <option value="">Semua Layanan</option>
+            </select>
+            <input type="date" id="filterDate" class="form-control" style="width:auto;">
+            <button class="btn btn-secondary btn-sm" id="btnReset">Reset</button>
+          </div>
+        </div>
+
+        <!-- Table -->
+        <div class="card">
+          <div class="table-wrapper">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Kode Order</th>
+                  <th>Pelanggan</th>
+                  <th>Layanan</th>
+                  <th>Berat</th>
+                  <th>Total</th>
+                  <th>Status</th>
+                  <th>Estimasi Selesai</th>
+                  <th>Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="orderTable">
+                <tr><td colspan="8" style="text-align:center;padding:40px;color:var(--text-muted);">Memuat data...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: New/Edit Order -->
+  <div class="modal-overlay" id="orderModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="orderModalTitle">Buat Order Baru</h3>
+        <button class="modal-close" onclick="closeModal('orderModal')">✕</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="editOrderId">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Nama Pelanggan *</label>
+            <input type="text" id="custName" class="form-control" placeholder="Nama lengkap" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Nomor WhatsApp *</label>
+            <input type="text" id="custPhone" class="form-control" placeholder="08xxxxxxxxxx" required>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Jenis Layanan *</label>
+            <select id="serviceType" class="form-control" required></select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Berat Cucian (Kg) *</label>
+            <input type="number" id="weightKg" class="form-control" step="0.1" min="0.5" placeholder="0.0" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Estimasi Harga</label>
+          <div class="highlight-box" id="pricePreview" style="font-size:18px;font-weight:700;color:var(--brand-primary);">—</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Catatan Tambahan</label>
+          <textarea id="notes" class="form-control" rows="2" placeholder="Contoh: warna memudar, pisahkan baju dalam..."></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('orderModal')">Batal</button>
+        <button class="btn btn-primary" id="saveOrderBtn">Simpan Order</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Detail Order -->
+  <div class="modal-overlay" id="detailModal">
+    <div class="modal" style="max-width:580px;">
+      <div class="modal-header">
+        <h3>Detail Order</h3>
+        <button class="modal-close" onclick="closeModal('detailModal')">✕</button>
+      </div>
+      <div class="modal-body" id="detailBody">
+        <!-- Filled by JS -->
+      </div>
+      <div class="modal-footer" id="detailFooter">
+        <!-- Filled by JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Batalkan -->
+  <div class="modal-overlay" id="cancelModal">
+    <div class="modal" style="max-width:420px;">
+      <div class="modal-header">
+        <h3>Batalkan Order</h3>
+        <button class="modal-close" onclick="closeModal('cancelModal')">✕</button>
+      </div>
+      <div class="modal-body">
+        <p class="fs-14 text-secondary mb-16">Masukkan alasan pembatalan order ini:</p>
+        <input type="hidden" id="cancelOrderId">
+        <div class="form-group">
+          <label class="form-label">Alasan Pembatalan *</label>
+          <textarea id="cancelReason" class="form-control" rows="3" placeholder="Contoh: pelanggan membatalkan sendiri..."></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('cancelModal')">Kembali</button>
+        <button class="btn btn-danger" id="confirmCancelBtn">Batalkan Order</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Print: Nota Order -->
+  <div id="printArea" style="display:none;"></div>
+
+  <script src="../js/app.js"></script>
+  <script>
+    let services = [];
+    let user;
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      user = requireAuth();
+      if (!user) return;
+
+      await loadServices();
+      await loadOrders();
+
+      // Filter events
+      ['searchInput', 'filterStatus', 'filterService', 'filterDate'].forEach(id => {
+        document.getElementById(id).addEventListener('change', loadOrders);
+      });
+      document.getElementById('searchInput').addEventListener('input', debounce(loadOrders, 400));
+
+      document.getElementById('btnReset').addEventListener('click', () => {
+        document.getElementById('searchInput').value = '';
+        document.getElementById('filterStatus').value = '';
+        document.getElementById('filterService').value = '';
+        document.getElementById('filterDate').value = '';
+        loadOrders();
+      });
+
+      // New Order
+      document.getElementById('btnNewOrder').addEventListener('click', () => {
+        document.getElementById('orderModalTitle').textContent = 'Buat Order Baru';
+        document.getElementById('editOrderId').value = '';
+        document.getElementById('saveOrderBtn').textContent = 'Simpan Order';
+        document.getElementById('orderModal').querySelector('form, #custName').value = '';
+        ['custName','custPhone','notes'].forEach(id => document.getElementById(id).value = '');
+        document.getElementById('weightKg').value = '';
+        document.getElementById('pricePreview').textContent = '—';
+        openModal('orderModal');
+      });
+
+      // Price preview
+      ['serviceType', 'weightKg'].forEach(id => {
+        document.getElementById(id).addEventListener('change', updatePricePreview);
+        document.getElementById(id).addEventListener('input', updatePricePreview);
+      });
+
+      // Save order
+      document.getElementById('saveOrderBtn').addEventListener('click', saveOrder);
+
+      // Cancel order confirm
+      document.getElementById('confirmCancelBtn').addEventListener('click', async () => {
+        const id = document.getElementById('cancelOrderId').value;
+        const reason = document.getElementById('cancelReason').value.trim();
+        if (!reason) { toast('Masukkan alasan pembatalan', 'warning'); return; }
+        const { ok, data } = await api(`/orders/${id}`, 'DELETE', { reason });
+        if (ok) {
+          toast('Order berhasil dibatalkan', 'success');
+          closeModal('cancelModal');
+          loadOrders();
+        } else {
+          toast(data.message, 'error');
+        }
+      });
+    });
+
+    function debounce(fn, delay) {
+      let t;
+      return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), delay); };
+    }
+
+    async function loadServices() {
+      const { ok, data } = await api('/master/services');
+      if (ok && data.success) {
+        services = data.services.filter(s => s.is_active);
+        const sel = document.getElementById('serviceType');
+        sel.innerHTML = '<option value="">-- Pilih Layanan --</option>';
+        const filterSel = document.getElementById('filterService');
+        filterSel.innerHTML = '<option value="">Semua Layanan</option>';
+        services.forEach(s => {
+          sel.innerHTML += `<option value="${s.id}" data-price="${s.price_per_kg}">${s.name} (${formatRp(s.price_per_kg)}/Kg) · Est ${s.est_days} Hari</option>`;
+          filterSel.innerHTML += `<option value="${s.id}">${s.name}</option>`;
+        });
+      }
+    }
+
+    function updatePricePreview() {
+      const sel = document.getElementById('serviceType');
+      const weight = parseFloat(document.getElementById('weightKg').value) || 0;
+      const opt = sel.options[sel.selectedIndex];
+      const price = parseFloat(opt?.dataset?.price || 0);
+      const total = price * weight;
+      document.getElementById('pricePreview').textContent = total > 0 ? formatRp(total) : '—';
+    }
+
+    async function loadOrders() {
+      const params = new URLSearchParams();
+      const s = document.getElementById('searchInput').value.trim();
+      const st = document.getElementById('filterStatus').value;
+      const sv = document.getElementById('filterService').value;
+      const dt = document.getElementById('filterDate').value;
+      if (s)  params.set('search', s);
+      if (st) params.set('status', st);
+      if (sv) params.set('service_type_id', sv);
+      if (dt) params.set('date', dt);
+
+      const { ok, data } = await api('/orders?' + params.toString());
+      const tbody = document.getElementById('orderTable');
+
+      if (!ok) { tbody.innerHTML = `<tr><td colspan="8" class="text-center">Gagal memuat data</td></tr>`; return; }
+
+      if (data.orders.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:40px;color:var(--text-muted);">Tidak ada order ditemukan</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = data.orders.map(o => `
+        <tr>
+          <td><span class="font-mono fw-600 fs-13" style="color:var(--brand-primary);">${o.order_code}</span></td>
+          <td>
+            <div class="fw-600 fs-13">${o.Customer?.name || '—'}</div>
+            <div class="fs-12 text-muted">${o.Customer?.phone || '—'}</div>
+          </td>
+          <td class="fs-13">${o.ServiceType?.name || '—'}</td>
+          <td class="fs-13">${o.weight_kg} Kg</td>
+          <td class="fw-600 fs-13">${formatRp(o.total_price)}</td>
+          <td><span class="badge badge-${o.status}">${statusLabel[o.status] || o.status}</span></td>
+          <td class="fs-12 text-muted">${o.est_finish_date ? formatDate(o.est_finish_date) : '—'}</td>
+          <td>
+            <div style="display:flex;gap:6px;">
+              <button class="btn btn-secondary btn-sm" onclick="showDetail(${o.id})">Detail</button>
+              ${o.status !== 'diambil' && o.status !== 'dibatalkan' ? `<button class="btn btn-sm" style="background:#FEF2F2;color:#DC2626;border:1px solid #FECACA;" onclick="showCancel(${o.id})">Batalkan</button>` : ''}
+            </div>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    async function saveOrder() {
+      const id = document.getElementById('editOrderId').value;
+      const payload = {
+        customer_name: document.getElementById('custName').value.trim(),
+        customer_phone: document.getElementById('custPhone').value.trim(),
+        service_type_id: document.getElementById('serviceType').value,
+        weight_kg: document.getElementById('weightKg').value,
+        notes: document.getElementById('notes').value.trim()
+      };
+
+      if (!payload.customer_name || !payload.customer_phone || !payload.service_type_id || !payload.weight_kg) {
+        toast('Lengkapi semua field wajib!', 'warning'); return;
+      }
+
+      const btn = document.getElementById('saveOrderBtn');
+      btn.disabled = true; btn.textContent = 'Menyimpan...';
+
+      let res;
+      if (id) {
+        res = await api(`/orders/${id}`, 'PUT', { weight_kg: payload.weight_kg, service_type_id: payload.service_type_id, notes: payload.notes });
+      } else {
+        res = await api('/orders', 'POST', payload);
+      }
+
+      btn.disabled = false; btn.textContent = id ? 'Simpan Perubahan' : 'Simpan Order';
+
+      if (res.ok) {
+        toast(id ? 'Order berhasil diupdate!' : 'Order baru berhasil dibuat!', 'success');
+        closeModal('orderModal');
+        loadOrders();
+      } else {
+        toast(res.data.message || 'Terjadi kesalahan', 'error');
+      }
+    }
+
+    async function showDetail(id) {
+      const { ok, data } = await api(`/orders/${id}`);
+      if (!ok) { toast('Gagal memuat detail', 'error'); return; }
+      const o = data.order;
+
+      const isPrintable = ['admin','owner','kasir'].includes(user.role);
+      const isEditable  = user.role === 'admin' && !['diambil','dibatalkan'].includes(o.status);
+
+      document.getElementById('detailBody').innerHTML = `
+        <div class="highlight-box mb-16" style="display:flex;justify-content:space-between;align-items:center;">
+          <div>
+            <div class="font-mono fw-700 fs-16" style="color:var(--brand-primary);">${o.order_code}</div>
+            <div class="fs-12 text-muted mt-4">Dibuat: ${formatDateTime(o.created_at)}</div>
+          </div>
+          <span class="badge badge-${o.status}" style="font-size:13px;padding:6px 14px;">${statusLabel[o.status]}</span>
+        </div>
+
+        <div class="form-row mb-16">
+          <div>
+            <div class="fs-12 text-muted mb-4">Pelanggan</div>
+            <div class="fw-600">${o.Customer?.name}</div>
+            <div class="fs-12 text-muted">${o.Customer?.phone}</div>
+          </div>
+          <div>
+            <div class="fs-12 text-muted mb-4">Layanan</div>
+            <div class="fw-600">${o.ServiceType?.name}</div>
+            <div class="fs-12 text-muted">${o.weight_kg} Kg · ${formatRp(o.total_price)}</div>
+          </div>
+        </div>
+
+        ${o.notes ? `<div class="form-group"><div class="fs-12 text-muted mb-4">Catatan</div><div class="fs-13" style="background:var(--color-bg);padding:10px 14px;border-radius:8px;">${o.notes}</div></div>` : ''}
+
+        <div class="section-title">Riwayat Status</div>
+        <div class="timeline">
+          ${(o.OrderStatusLogs || []).map(log => `
+            <div class="timeline-item done">
+              <div class="timeline-label">${statusLabel[log.new_status] || log.new_status}</div>
+              <div class="timeline-time">${formatDateTime(log.changed_at || log.createdAt)} · ${log.changer?.name || '—'}</div>
+            </div>
+          `).join('') || '<p class="text-muted fs-13">Belum ada riwayat.</p>'}
+        </div>
+      `;
+
+      document.getElementById('detailFooter').innerHTML = `
+        ${isPrintable ? `<button class="btn btn-secondary btn-sm" onclick="printNota(${o.id})">🖨 Cetak Nota</button>` : ''}
+        ${isEditable ? `<button class="btn btn-secondary btn-sm" onclick="editOrder(${o.id})">✏️ Edit</button>` : ''}
+        <button class="btn btn-secondary" onclick="closeModal('detailModal')">Tutup</button>
+      `;
+
+      window._currentOrderForPrint = o;
+      openModal('detailModal');
+    }
+
+    function printNota(id) {
+      const o = window._currentOrderForPrint;
+      if (!o) return;
+      const html = `
+        <style>body{font-family:monospace;padding:20px;max-width:300px;margin:auto}h2{text-align:center;margin-bottom:4px}p{margin:2px 0;font-size:13px}.dashed{border-top:1px dashed #000;margin:10px 0}.right{text-align:right}.bold{font-weight:bold}</style>
+        <h2>🧺 KiloWash</h2>
+        <p style="text-align:center;font-size:12px;">Nota Transaksi</p>
+        <div class="dashed"></div>
+        <p>Kode: <span class="bold">${o.order_code}</span></p>
+        <p>Tgl : ${formatDate(o.created_at)}</p>
+        <div class="dashed"></div>
+        <p>Pelanggan : ${o.Customer?.name}</p>
+        <p>No. WA    : ${o.Customer?.phone}</p>
+        <div class="dashed"></div>
+        <p>Layanan   : ${o.ServiceType?.name}</p>
+        <p>Berat     : ${o.weight_kg} Kg</p>
+        <p>Harga/Kg  : ${formatRp(o.ServiceType?.price_per_kg)}</p>
+        <div class="dashed"></div>
+        <p class="right bold">TOTAL: ${formatRp(o.total_price)}</p>
+        <div class="dashed"></div>
+        <p>Est. Selesai: ${formatDate(o.est_finish_date)}</p>
+        <p style="text-align:center;margin-top:16px;font-size:12px;">Terima kasih!</p>
+      `;
+      const w = window.open('', '_blank', 'width=400,height=600');
+      w.document.write(html);
+      w.document.close();
+      w.print();
+    }
+
+    async function editOrder(id) {
+      const { ok, data } = await api(`/orders/${id}`);
+      if (!ok) return;
+      const o = data.order;
+      document.getElementById('orderModalTitle').textContent = 'Edit Order';
+      document.getElementById('editOrderId').value = o.id;
+      document.getElementById('custName').value = o.Customer?.name;
+      document.getElementById('custPhone').value = o.Customer?.phone;
+      document.getElementById('serviceType').value = o.service_type_id;
+      document.getElementById('weightKg').value = o.weight_kg;
+      document.getElementById('notes').value = o.notes || '';
+      document.getElementById('saveOrderBtn').textContent = 'Simpan Perubahan';
+      updatePricePreview();
+      closeModal('detailModal');
+      openModal('orderModal');
+    }
+
+    function showCancel(id) {
+      document.getElementById('cancelOrderId').value = id;
+      document.getElementById('cancelReason').value = '';
+      openModal('cancelModal');
+    }
+  </script>
+</body>
+</html>

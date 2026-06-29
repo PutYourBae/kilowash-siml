@@ -1,5 +1,5 @@
 const { ServiceType, User, sequelize } = require('../models');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 
 // -- SERVICES --
 exports.getServices = async (req, res) => {

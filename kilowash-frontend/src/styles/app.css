@@ -970,3 +970,8 @@ input, select, textarea, button { font-family: var(--font-body); }
 @view-transition { navigation: auto; }
 body { animation: fadeIn 0.3s ease-out; }
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+/* Prevent text selection app-wide for native feel */
+body { user-select: none; -webkit-user-select: none; }
+/* Allow selection in inputs and specific copyable text */
+input, textarea, .selectable, .order-code, td, th { user-select: text; -webkit-user-select: text; }

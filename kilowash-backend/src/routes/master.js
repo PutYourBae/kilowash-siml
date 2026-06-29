@@ -5,13 +5,13 @@ const authMiddleware = require('../middleware/authMiddleware');
 const roleMiddleware = require('../middleware/roleMiddleware');
 
 router.get('/services', masterController.getServices);
-router.post('/services', authMiddleware, roleMiddleware(['admin', 'owner']), masterController.createService);
-router.put('/services/:id', authMiddleware, roleMiddleware(['admin', 'owner']), masterController.updateService);
+router.post('/services', authMiddleware, roleMiddleware(['owner']), masterController.createService);
+router.put('/services/:id', authMiddleware, roleMiddleware(['owner']), masterController.updateService);
 
-router.get('/users', authMiddleware, roleMiddleware(['admin', 'owner']), masterController.getUsers);
-router.post('/users', authMiddleware, roleMiddleware(['admin', 'owner']), masterController.createUser);
-router.put('/users/:id', authMiddleware, roleMiddleware(['admin', 'owner']), masterController.updateUser);
+router.get('/users', authMiddleware, roleMiddleware(['owner']), masterController.getUsers);
+router.post('/users', authMiddleware, roleMiddleware(['owner']), masterController.createUser);
+router.put('/users/:id', authMiddleware, roleMiddleware(['owner']), masterController.updateUser);
 
-router.get('/outlet', authMiddleware, roleMiddleware(['admin', 'owner']), masterController.getOutletInfo);
+router.get('/outlet', authMiddleware, roleMiddleware(['owner']), masterController.getOutletInfo);
 
 module.exports = router;

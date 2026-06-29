@@ -165,7 +165,7 @@
     let user;
 
     document.addEventListener('DOMContentLoaded', async () => {
-      user = requireAuth();
+      user = requireAuth(['owner', 'admin', 'kasir']);
       if (!user) return;
 
       await loadServices();

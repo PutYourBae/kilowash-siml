@@ -151,7 +151,7 @@
   <script src="../js/app.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-      requireAuth(['admin', 'owner']);
+      requireAuth(['owner']);
       loadServices();
       loadUsers();
       document.getElementById('btnAddService').addEventListener('click', () => openServiceModal());

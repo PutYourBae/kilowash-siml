@@ -4,10 +4,10 @@ const reportController = require('../controllers/reportController');
 const authMiddleware = require('../middleware/authMiddleware');
 const roleMiddleware = require('../middleware/roleMiddleware');
 
-const ownerAdmin = roleMiddleware(['owner', 'admin']);
+const ownerOnly = roleMiddleware(['owner']);
 
-router.get('/daily', authMiddleware, ownerAdmin, reportController.getDailyReport);
-router.get('/monthly', authMiddleware, ownerAdmin, reportController.getMonthlyReport);
-router.get('/export', authMiddleware, ownerAdmin, reportController.exportCSV);
+router.get('/daily', authMiddleware, ownerOnly, reportController.getDailyReport);
+router.get('/monthly', authMiddleware, ownerOnly, reportController.getMonthlyReport);
+router.get('/export', authMiddleware, ownerOnly, reportController.exportCSV);
 
 module.exports = router;

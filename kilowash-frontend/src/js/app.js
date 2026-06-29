@@ -117,16 +117,16 @@ class AppSidebar extends HTMLElement {
 
         <div class="sidebar-section">
           <div class="sidebar-section-label">Menu Utama</div>
-          ${nav('dashboard.html', '📊', 'Dashboard', ['owner', 'admin'])}
-          ${nav('orders.html', '📋', 'Daftar Order')}
-          ${nav('queue.html', '🔄', 'Antrian Laundry', ['admin', 'petugas', 'owner'])}
-          ${nav('payments.html', '💳', 'Kasir & Pembayaran', ['admin', 'kasir', 'owner'])}
+          ${nav('dashboard.html', '📊', 'Dashboard', ['owner'])}
+          ${nav('orders.html', '📋', 'Daftar Order', ['owner', 'admin', 'kasir'])}
+          ${nav('queue.html', '🔄', 'Antrian Laundry', ['owner', 'admin', 'petugas'])}
+          ${nav('payments.html', '💳', 'Kasir & Pembayaran', ['owner', 'admin', 'kasir'])}
         </div>
 
         <div class="sidebar-section">
           <div class="sidebar-section-label">Laporan & Master</div>
-          ${nav('reports.html', '📈', 'Laporan', ['owner', 'admin'])}
-          ${nav('master.html', '⚙️', 'Data Master', ['admin', 'owner'])}
+          ${nav('reports.html', '📈', 'Laporan', ['owner'])}
+          ${nav('master.html', '⚙️', 'Data Master', ['owner'])}
         </div>
 
         <div class="sidebar-footer">

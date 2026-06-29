@@ -105,7 +105,7 @@
   <script>
     let chart;
     document.addEventListener('DOMContentLoaded', async () => {
-      const user = requireAuth(['owner', 'admin']);
+      const user = requireAuth(['owner']);
       if (!user) return;
 
       document.getElementById('dateText').textContent = new Date().toLocaleDateString('id-ID', { weekday:'long', day:'numeric', month:'long', year:'numeric' });

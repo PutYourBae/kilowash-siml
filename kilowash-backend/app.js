@@ -3,6 +3,9 @@ const express = require('express');
 const cors = require('cors');
 const sequelize = require('./src/config/database');
 
+// Import models agar terdaftar
+require('./src/models/index');
+
 const app = express();
 
 app.use(cors());
@@ -42,25 +45,22 @@ app.use((err, req, res, next) => {
   res.status(500).json({ success: false, message: 'Internal Server Error' });
 });
 
-// Import models
-require('./src/models/index');
-
-const PORT = process.env.PORT || 3000;
-
-const startServer = async () => {
-  try {
-    await sequelize.authenticate();
-    console.log('✅ Database connected.');
-    if (process.env.NODE_ENV !== 'production') {
-      await sequelize.sync({ alter: true });
+// Jalankan server lokal (hanya di lingkungan development, bukan Vercel)
+if (process.env.NODE_ENV !== 'production') {
+  const PORT = process.env.PORT || 3000;
+  sequelize.authenticate()
+    .then(() => {
+      console.log('✅ Database connected.');
+      return sequelize.sync({ alter: true });
+    })
+    .then(() => {
       console.log('✅ Database synchronized.');
       app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
-    }
-  } catch (error) {
-    console.error('❌ Cannot connect to database:', error);
-  }
-};
+    })
+    .catch((error) => {
+      console.error('❌ Cannot connect to database:', error);
+    });
+}
 
-startServer();
-
+// Wajib untuk Vercel serverless
 module.exports = app;

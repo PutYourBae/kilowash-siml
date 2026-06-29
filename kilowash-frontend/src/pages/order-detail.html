@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Detail Order | KiloWash</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="../styles/app.css">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%A7%BA%3C/text%3E%3C/svg%3E">
+</head>
+<body class="app-layout">
+  <!-- Sidebar akan di-inject oleh JS -->
+  <aside class="sidebar" id="sidebar"></aside>
+
+  <main class="main-content">
+    <div class="topbar">
+      <div class="page-title">
+        <h1 class="fs-20 fw-700 m-0">Detail Order</h1>
+      </div>
+      <div class="user-profile">
+        <div class="avatar" id="userAvatar">A</div>
+        <div class="user-info">
+          <div class="fw-600 fs-14" id="userName">Admin</div>
+          <div class="fs-12 text-muted" id="userRole">Administrator</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="content">
+      <div class="card" style="max-width: 600px; margin: 0 auto; padding: 24px;">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom: 24px;">
+          <div>
+            <h2 class="fs-18 fw-700 m-0" id="detailOrderCode" style="color:var(--brand-primary)">Memuat...</h2>
+            <div class="fs-13 text-muted mt-2" id="detailDate"></div>
+          </div>
+          <span class="badge" id="detailStatus" style="font-size: 14px; padding: 6px 12px;"></span>
+        </div>
+
+        <div style="background:var(--bg-light); border-radius: 8px; padding: 16px; margin-bottom: 20px;">
+          <h3 class="fs-14 fw-600 mb-3 text-muted">INFO PELANGGAN</h3>
+          <div class="fw-600 fs-16 mb-1" id="detailCustName">-</div>
+          <div class="fs-13 text-muted mb-2" id="detailCustPhone">-</div>
+        </div>
+
+        <div style="background:var(--bg-light); border-radius: 8px; padding: 16px; margin-bottom: 24px;">
+          <h3 class="fs-14 fw-600 mb-3 text-muted">DETAIL LAYANAN</h3>
+          <div style="display:flex; justify-content:space-between; margin-bottom: 8px;">
+            <span class="fs-14 fw-500">Layanan</span>
+            <span class="fs-14 fw-600" id="detailServiceName">-</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; margin-bottom: 8px;">
+            <span class="fs-14 fw-500">Jumlah / Berat</span>
+            <span class="fs-14 fw-600" id="detailWeight">-</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; margin-bottom: 8px;">
+            <span class="fs-14 fw-500">Estimasi Selesai</span>
+            <span class="fs-14 fw-600" id="detailEst">-</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; padding-top: 12px; border-top: 1px dashed var(--border-color); margin-top: 12px;">
+            <span class="fs-16 fw-600">Total Harga</span>
+            <span class="fs-18 fw-700" style="color:var(--brand-primary)" id="detailTotal">-</span>
+          </div>
+        </div>
+
+        <div style="display:flex; gap: 12px;">
+          <button class="btn btn-secondary" style="flex:1" onclick="window.history.back()">Kembali</button>
+          <button class="btn btn-primary" style="flex:1" onclick="window.print()">🖨 Cetak Struk</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="../js/config.js"></script>
+  <script src="../js/app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      requireAuth(['owner', 'admin', 'kasir']);
+      setupSidebar();
+      
+      const urlParams = new URLSearchParams(window.location.search);
+      const code = urlParams.get('code');
+      
+      if (!code) {
+        toast('Kode order tidak ditemukan', 'error');
+        return;
+      }
+      
+      const { ok, data } = await api(`/track/${code}`);
+      if (!ok || !data.success) {
+        toast('Order tidak ditemukan', 'error');
+        return;
+      }
+      
+      const order = data.order;
+      
+      document.getElementById('detailOrderCode').textContent = order.order_code;
+      document.getElementById('detailDate').textContent = new Date(order.created_at).toLocaleString('id-ID');
+      
+      const badge = document.getElementById('detailStatus');
+      badge.textContent = order.status.toUpperCase();
+      badge.className = `badge badge-${order.status}`;
+      
+      document.getElementById('detailCustName').textContent = order.Customer?.name || '-';
+      document.getElementById('detailCustPhone').textContent = order.Customer?.phone || '-';
+      
+      document.getElementById('detailServiceName').textContent = order.ServiceType?.name || '-';
+      
+      const unit = order.ServiceType?.unit === 'pcs' ? 'Pcs' : 'Kg';
+      document.getElementById('detailWeight').textContent = `${order.weight_kg} ${unit}`;
+      
+      const est = new Date(order.estimated_completion);
+      document.getElementById('detailEst').textContent = est.toLocaleDateString('id-ID');
+      
+      document.getElementById('detailTotal').textContent = formatRp(order.total_price);
+    });
+  </script>
+</body>
+</html>

@@ -1,8 +1,6 @@
 // ============================================================
 // API HELPER
 // ============================================================
-const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://' + window.location.hostname + ':3000/api' : 'https://kilowash-siml.vercel.app/api';
-
 const api = async (endpoint, method = 'GET', body = null) => {
   const token = localStorage.getItem('kw_token');
   const headers = { 'Content-Type': 'application/json' };
@@ -12,7 +10,7 @@ const api = async (endpoint, method = 'GET', body = null) => {
   if (body) opts.body = JSON.stringify(body);
 
   try {
-    const res = await fetch(`${API_BASE}${endpoint}`, opts);
+    const res = await fetch(`${CONFIG.API_BASE}${endpoint}`, opts);
     const data = await res.json();
     return { ok: res.ok, status: res.status, data };
   } catch (err) {

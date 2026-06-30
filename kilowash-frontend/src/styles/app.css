@@ -933,6 +933,10 @@ input, select, textarea, button { font-family: var(--font-body); }
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
   }
+  
+  .data-table {
+    min-width: 800px; /* Paksa lebar tabel agar bisa di-scroll */
+  }
 
   /* Card full width */
   .card {
@@ -973,14 +977,20 @@ input, select, textarea, button { font-family: var(--font-body); }
     gap: 8px;
   }
 
-  /* Kanban kolom: scroll horizontal */
+  /* Kanban: stack vertikal di mobile */
   .kanban-board {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    padding-bottom: 8px;
+    grid-template-columns: 1fr !important;
+    overflow-x: visible;
   }
   .kanban-col {
-    min-width: 280px;
+    min-width: 0 !important;
+    max-height: none !important;
+    margin-bottom: 20px;
+  }
+
+  /* Kasir & Pembayaran layout: stack vertikal */
+  .payment-layout {
+    grid-template-columns: 1fr !important;
   }
 
   /* Sembunyikan teks di beberapa tombol */

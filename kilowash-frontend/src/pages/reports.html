@@ -168,12 +168,14 @@
         const entries = Object.entries(d2.data.breakdown);
         if (entries.length === 0) { bd.innerHTML = '<p class="text-muted fs-13">Belum ada data transaksi hari ini.</p>'; return; }
         bd.innerHTML = `
-          <table class="data-table">
-            <thead><tr><th>Jenis Layanan</th><th>Jumlah Transaksi</th><th>Total Pendapatan</th></tr></thead>
-            <tbody>
-              ${entries.map(([n, i]) => `<tr><td class="fw-600">${n}</td><td>${i.count} transaksi</td><td class="fw-700" style="color:var(--brand-primary);">${formatRp(i.revenue)}</td></tr>`).join('')}
-            </tbody>
-          </table>
+          <div class="table-wrapper">
+            <table class="data-table">
+              <thead><tr><th>Jenis Layanan</th><th>Jumlah Transaksi</th><th>Total Pendapatan</th></tr></thead>
+              <tbody>
+                ${entries.map(([n, i]) => `<tr><td class="fw-600">${n}</td><td>${i.count} transaksi</td><td class="fw-700" style="color:var(--brand-primary);">${formatRp(i.revenue)}</td></tr>`).join('')}
+              </tbody>
+            </table>
+          </div>
         `;
       }
     }

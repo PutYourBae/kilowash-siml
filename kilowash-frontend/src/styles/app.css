@@ -885,10 +885,15 @@ input, select, textarea, button { font-family: var(--font-body); }
     margin-left: 0;
   }
 
-  /* Topbar: tampilkan hamburger menu */
+  /* Topbar: tampilkan hamburger menu, atur posisi judul */
   .topbar {
     padding: 0 16px;
     gap: 12px;
+    justify-content: flex-start;
+  }
+  
+  .topbar-title {
+    margin-right: auto;
   }
 
   .topbar-title h1 {
@@ -1014,9 +1019,6 @@ input, select, textarea, button { font-family: var(--font-body); }
     font-size: 18px !important;
   }
 
-  .topbar-actions .btn:not(.btn-primary) {
-    display: none;
-  }
 }
 
 /* ============================================================

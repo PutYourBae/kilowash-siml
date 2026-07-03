@@ -1,4 +1,4 @@
-const { ServiceType, User, sequelize } = require('../models');
+const { ServiceType, User, Branch, sequelize } = require('../models');
 const bcrypt = require('bcryptjs');
 
 // -- SERVICES --
@@ -33,19 +33,23 @@ exports.updateService = async (req, res) => {
 // -- USERS --
 exports.getUsers = async (req, res) => {
   try {
-    const users = await User.findAll({ attributes: { exclude: ['password'] }, order: [['id', 'ASC']] });
+    const users = await User.findAll({ 
+      attributes: { exclude: ['password'] },
+      include: [{ model: Branch, attributes: ['id', 'name'] }],
+      order: [['id', 'ASC']] 
+    });
     res.json({ success: true, users });
   } catch (error) { res.status(500).json({ success: false, message: 'Server error' }); }
 };
 
 exports.createUser = async (req, res) => {
   try {
-    const { name, email, password, role } = req.body;
+    const { name, email, password, role, branch_id } = req.body;
     const existing = await User.findOne({ where: { email } });
     if (existing) return res.status(400).json({ success: false, message: 'Email sudah terdaftar' });
     const hashedPassword = await bcrypt.hash(password, 10);
-    const user = await User.create({ name, email, password: hashedPassword, role });
-    res.status(201).json({ success: true, user: { id: user.id, name, email, role } });
+    const user = await User.create({ name, email, password: hashedPassword, role, branch_id: branch_id || null });
+    res.status(201).json({ success: true, user: { id: user.id, name, email, role, branch_id: user.branch_id } });
   } catch (error) { res.status(500).json({ success: false, message: 'Server error' }); }
 };
 
@@ -53,11 +57,11 @@ exports.updateUser = async (req, res) => {
   try {
     const user = await User.findByPk(req.params.id);
     if (!user) return res.status(404).json({ success: false, message: 'User tidak ditemukan' });
-    const { name, role, is_active, password } = req.body;
-    const updateData = { name, role, is_active };
+    const { name, role, is_active, password, branch_id } = req.body;
+    const updateData = { name, role, is_active, branch_id: branch_id || null };
     if (password) updateData.password = await bcrypt.hash(password, 10);
     await user.update(updateData);
-    res.json({ success: true, user: { id: user.id, name: user.name, role: user.role, is_active: user.is_active } });
+    res.json({ success: true, user: { id: user.id, name: user.name, role: user.role, is_active: user.is_active, branch_id: user.branch_id } });
   } catch (error) { res.status(500).json({ success: false, message: 'Server error' }); }
 };
 

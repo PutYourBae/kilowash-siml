@@ -18,12 +18,9 @@ const generateOrderCode = async () => {
 
 // ─── Helpers: Branch Filter ─────────────────────────────────────
 
-/**
- * FR-B3: Jika user adalah branch_admin, paksa filter ke cabangnya sendiri.
- */
 const getBranchFilter = (user, requestedBranchId) => {
-  if (user.role === 'branch_admin') return user.branch_id;
-  if (requestedBranchId) return requestedBranchId;
+  if (user.branch_id) return user.branch_id;
+  if (requestedBranchId && user.role === 'owner') return requestedBranchId;
   return null;
 };
 

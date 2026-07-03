@@ -21,6 +21,7 @@
           <p id="dateText"></p>
         </div>
         <div class="topbar-actions">
+          <select id="filterBranch" class="form-control" style="display:none; width:auto; padding:8px 12px; font-size:13px;"></select>
           <button class="btn btn-secondary btn-sm" id="refreshBtn">⟳ Refresh</button>
         </div>
       </div>
@@ -111,6 +112,17 @@
 
       document.getElementById('dateText').textContent = new Date().toLocaleDateString('id-ID', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
 
+      // Load branches if owner
+      if (user.role === 'owner') {
+        const { ok: bOk, data: bData } = await api('/branches');
+        if (bOk && bData.success) {
+          const bSel = document.getElementById('filterBranch');
+          bSel.style.display = 'inline-block';
+          bSel.innerHTML = '<option value="">Semua Cabang</option>' + bData.data.map(b => `<option value="${b.id}">${b.name}</option>`).join('');
+          bSel.addEventListener('change', () => { loadDashboard(); loadChart(); });
+        }
+      }
+
       // Populate selects
       const months = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
       const mSel = document.getElementById('chartMonth');
@@ -129,7 +141,9 @@
     });
 
     async function loadDashboard() {
-      const { ok, data } = await api('/reports/daily');
+      const bId = document.getElementById('filterBranch').value || '';
+      const qs = bId ? `?branch_id=${bId}` : '';
+      const { ok, data } = await api(`/reports/daily${qs}`);
       if (ok && data.success) {
         const d = data.data;
         document.getElementById('s-total').textContent   = d.total_orders;
@@ -155,7 +169,7 @@
       }
 
       // Recent Orders (limit 10 for performance)
-      const { ok: ok2, data: d2 } = await api('/orders?limit=10');
+      const { ok: ok2, data: d2 } = await api(`/orders?limit=10${bId ? '&branch_id='+bId : ''}`);
       if (ok2 && d2.success) {
         const recent = d2.data.orders.slice(0, 6);
         const el = document.getElementById('recentOrders');
@@ -178,7 +192,9 @@
     async function loadChart() {
       const month = document.getElementById('chartMonth').value;
       const year  = document.getElementById('chartYear').value;
-      const { ok, data } = await api(`/reports/monthly?month=${month}&year=${year}`);
+      const bId   = document.getElementById('filterBranch').value || '';
+      const qs    = `?month=${month}&year=${year}${bId ? '&branch_id='+bId : ''}`;
+      const { ok, data } = await api(`/reports/monthly${qs}`);
       if (!ok || !data.success) return;
 
       const labels   = data.data.chart.map(d => d.date.slice(8));

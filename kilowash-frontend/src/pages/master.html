@@ -52,7 +52,7 @@
             </div>
             <div class="table-wrapper">
               <table class="data-table">
-                <thead><tr><th>Nama</th><th>Email</th><th>Role</th><th>Status</th><th>Aksi</th></tr></thead>
+                <thead><tr><th>Nama</th><th>Email</th><th>Role</th><th>Cabang</th><th>Status</th><th>Aksi</th></tr></thead>
                 <tbody id="userTable"><tr><td colspan="5" style="text-align:center;padding:30px;">Memuat...</td></tr></tbody>
               </table>
             </div>
@@ -142,6 +142,13 @@
           </div>
         </div>
         <div class="form-group">
+          <label class="form-label">Cabang Penugasan</label>
+          <select id="uBranch" class="form-control">
+            <option value="">Pusat (Semua Cabang)</option>
+          </select>
+          <div class="fs-12 text-muted mt-4">Pilih Pusat agar dapat mengakses semua cabang.</div>
+        </div>
+        <div class="form-group">
           <label class="form-label" id="pwLabel">Password *</label>
           <input type="password" id="uPassword" class="form-control" placeholder="Min. 6 karakter">
           <div class="fs-12 text-muted mt-4" id="pwHint" style="display:none;">Kosongkan jika tidak ingin mengubah password</div>
@@ -164,8 +171,15 @@
   <script src="../js/config.js"></script>
   <script src="../js/app.js"></script>
   <script>
-    document.addEventListener('DOMContentLoaded', () => {
+    document.addEventListener('DOMContentLoaded', async () => {
       requireAuth(['owner']);
+      
+      const { ok: bOk, data: bData } = await api('/branches');
+      if (bOk && bData.success) {
+        const uB = document.getElementById('uBranch');
+        if (uB) uB.innerHTML = '<option value="">Pusat (Semua Cabang)</option>' + bData.data.map(b => `<option value="${b.id}">${b.name}</option>`).join('');
+      }
+
       loadServices();
       loadUsers();
       document.getElementById('btnAddService').addEventListener('click', () => openServiceModal());
@@ -204,7 +218,8 @@
         <tr>
           <td class="fw-600">${u.name}</td>
           <td class="fs-13 text-secondary">${u.email}</td>
-          <td><span class="badge badge-info" style="text-transform:capitalize;">${u.role}</span></td>
+          <td><span class="badge badge-info" style="text-transform:capitalize;">${u.role.replace('_', ' ')}</span></td>
+          <td class="fs-13 text-muted">${u.Branch?.name || 'Pusat'}</td>
           <td><span class="badge ${u.is_active ? 'badge-success' : 'badge-diambil'}">${u.is_active ? 'Aktif' : 'Non-Aktif'}</span></td>
           <td><button class="btn btn-secondary btn-sm" onclick='openUserModal(${JSON.stringify(u)})'>Edit</button></td>
         </tr>
@@ -252,6 +267,7 @@
       document.getElementById('uName').value     = u?.name || '';
       document.getElementById('uEmail').value    = u?.email || '';
       document.getElementById('uRole').value     = u?.role || 'kasir';
+      document.getElementById('uBranch').value   = u?.branch_id || '';
       document.getElementById('uPassword').value = '';
       document.getElementById('uActive').value   = u ? String(u.is_active) : 'true';
       document.getElementById('pwLabel').textContent = u ? 'Password (Opsional)' : 'Password *';
@@ -267,6 +283,7 @@
         name: document.getElementById('uName').value.trim(),
         email: document.getElementById('uEmail').value.trim(),
         role: document.getElementById('uRole').value,
+        branch_id: document.getElementById('uBranch').value || null,
         is_active: document.getElementById('uActive').value === 'true'
       };
       const pw = document.getElementById('uPassword').value;

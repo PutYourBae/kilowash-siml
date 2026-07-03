@@ -16,14 +16,23 @@ const getDayRangeWIB = (dateStr) => {
   return { start, end, wibDateStr };
 };
 
+const getBranchFilter = (user, requestedBranchId) => {
+  if (user.branch_id) return user.branch_id;
+  if (requestedBranchId && user.role === 'owner') return requestedBranchId;
+  return null;
+};
+
 exports.getDailyReport = async (req, res) => {
   try {
     const { start, end, wibDateStr } = getDayRangeWIB(req.query.date);
 
-    const orders = await Order.findAll({ where: { created_at: { [Op.between]: [start, end] } } });
+    const branchId = getBranchFilter(req.user, req.query.branch_id);
+    const orderWhere = branchId ? { branch_id: branchId } : {};
+
+    const orders = await Order.findAll({ where: { created_at: { [Op.between]: [start, end] }, ...orderWhere } });
     const payments = await Payment.findAll({
       where: { paid_at: { [Op.between]: [start, end] } },
-      include: [{ model: Order, include: [{ model: ServiceType }] }]
+      include: [{ model: Order, where: orderWhere, include: [{ model: ServiceType }] }]
     });
 
     const total_orders      = orders.length;
@@ -57,9 +66,12 @@ exports.getMonthlyReport = async (req, res) => {
     const start = new Date(`${y}-${String(m).padStart(2,'0')}-01T00:00:00+07:00`);
     const end   = new Date(`${y}-${String(m).padStart(2,'0')}-${String(daysInMonth).padStart(2,'0')}T23:59:59.999+07:00`);
 
+    const branchId = getBranchFilter(req.user, req.query.branch_id);
+    const orderWhere = branchId ? { branch_id: branchId } : {};
+
     const payments = await Payment.findAll({
       where: { paid_at: { [Op.between]: [start, end] } },
-      include: [{ model: Order, include: [{ model: ServiceType }] }]
+      include: [{ model: Order, where: orderWhere, include: [{ model: ServiceType }] }]
     });
 
     // Inisialisasi data harian
@@ -102,9 +114,12 @@ exports.exportCSV = async (req, res) => {
     const start = new Date(`${y}-${String(m).padStart(2,'0')}-01T00:00:00+07:00`);
     const end   = new Date(`${y}-${String(m).padStart(2,'0')}-${String(daysInMonth).padStart(2,'0')}T23:59:59.999+07:00`);
 
+    const branchId = getBranchFilter(req.user, req.query.branch_id);
+    const orderWhere = branchId ? { branch_id: branchId } : {};
+
     const payments = await Payment.findAll({
       where: { paid_at: { [Op.between]: [start, end] } },
-      include: [{ model: Order, include: [{ model: Customer }, { model: ServiceType }] }]
+      include: [{ model: Order, where: orderWhere, include: [{ model: Customer }, { model: ServiceType }] }]
     });
 
     let csv = '\uFEFFKode Order;Pelanggan;Layanan;Berat (Kg/Pcs);Total;Metode Bayar;Tanggal Bayar\n';

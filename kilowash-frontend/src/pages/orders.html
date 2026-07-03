@@ -31,6 +31,7 @@
               <span class="search-icon">🔍</span>
               <input type="text" id="searchInput" class="form-control" placeholder="Cari kode order atau nama pelanggan...">
             </div>
+            <select id="filterBranch" class="form-control" style="width:auto;min-width:150px;display:none;"></select>
             <select id="filterStatus" class="form-control" style="width:auto;min-width:150px;">
               <option value="">Semua Status</option>
               <option value="diterima">Diterima</option>
@@ -54,6 +55,7 @@
               <thead>
                 <tr>
                   <th>Kode Order</th>
+                  <th>Cabang</th>
                   <th>Pelanggan</th>
                   <th>Layanan</th>
                   <th>Berat</th>
@@ -184,6 +186,16 @@
       await loadServices();
       await loadOrders();
 
+      if (user.role === 'owner') {
+        const { ok: bOk, data: bData } = await api('/branches');
+        if (bOk && bData.success) {
+          const bSel = document.getElementById('filterBranch');
+          bSel.style.display = 'inline-block';
+          bSel.innerHTML = '<option value="">Semua Cabang</option>' + bData.data.map(b => `<option value="${b.id}">${b.name}</option>`).join('');
+          bSel.addEventListener('change', () => { currentPage = 1; loadOrders(); });
+        }
+      }
+
       // Filter events
       const searchInput = document.getElementById('searchInput');
       let t;
@@ -211,6 +223,7 @@
         document.getElementById('saveOrderBtn').textContent = 'Simpan Order';
         ['custName','custPhone','notes'].forEach(id => document.getElementById(id).value = '');
         document.getElementById('weightKg').value = '';
+        document.getElementById('pointsToRedeem').value = '';
         document.getElementById('pricePreview').textContent = '—';
         openModal('orderModal');
       });
@@ -289,10 +302,12 @@
       const st = document.getElementById('filterStatus').value;
       const sv = document.getElementById('filterService').value;
       const dt = document.getElementById('filterDate').value;
+      const bi = document.getElementById('filterBranch') ? document.getElementById('filterBranch').value : '';
       if (s)  params.set('search', s);
       if (st) params.set('status', st);
       if (sv) params.set('service_type_id', sv);
       if (dt) params.set('date', dt);
+      if (bi) params.set('branch_id', bi);
       params.set('page', currentPage);
       params.set('limit', 20);
 
@@ -318,6 +333,7 @@
       tbody.innerHTML = orders.map(o => `
         <tr>
           <td><span class="font-mono fw-600 fs-13" style="color:var(--brand-primary);">${o.order_code}</span></td>
+          <td class="fs-13 text-muted">${o.Branch?.name || 'Pusat'}</td>
           <td>
             <div class="fw-600 fs-13">${o.Customer?.name || '—'}</div>
             <div class="fs-12 text-muted">${o.Customer?.phone || '—'}</div>
@@ -352,6 +368,7 @@
         customer_phone: document.getElementById('custPhone').value.trim(),
         service_type_id: document.getElementById('serviceType').value,
         weight_kg: document.getElementById('weightKg').value,
+        points_to_redeem: document.getElementById('pointsToRedeem').value || 0,
         notes: document.getElementById('notes').value.trim()
       };
 

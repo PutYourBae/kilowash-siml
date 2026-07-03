@@ -7,6 +7,9 @@ Aplikasi manajemen laundry berbasis web dengan fitur:
 - 📲 Notifikasi WhatsApp Otomatis (Fonnte)
 - 📊 Laporan Keuangan
 - 🔍 Tracking Order Publik
+- ⭐ Feedback Pelanggan & Multi-Cabang (v2)
+
+📄 **[Laporan Capstone Project v2](file:///d:/Dev/KiloWashV2/Laporan_Capstone_KiloWash_v2.md)**
 
 ## Tech Stack
 

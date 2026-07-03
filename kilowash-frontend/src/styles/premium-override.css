@@ -1,0 +1,188 @@
+/* ============================================================
+   PREMIUM UI OVERRIDE (1000x Cooler & Lightweight)
+   ============================================================ */
+
+/* 1. Global Background & Mesh Gradient */
+body {
+  background-color: #F8FAFC;
+  background-image: 
+    radial-gradient(at 40% 20%, hsla(158, 82%, 92%, 1) 0px, transparent 50%),
+    radial-gradient(at 80% 0%, hsla(189, 100%, 96%, 1) 0px, transparent 50%),
+    radial-gradient(at 0% 50%, hsla(33, 100%, 94%, 1) 0px, transparent 50%);
+  background-attachment: fixed;
+  color: #0F172A;
+  font-family: 'Inter', sans-serif;
+}
+
+/* 2. Sidebar Glassmorphism */
+.sidebar {
+  background: rgba(13, 27, 42, 0.85) !important;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-right: 1px solid rgba(255,255,255,0.1) !important;
+  box-shadow: 4px 0 24px rgba(0,0,0,0.1);
+}
+.sidebar-header {
+  border-bottom: 1px solid rgba(255,255,255,0.1) !important;
+}
+.sidebar-footer {
+  border-top: 1px solid rgba(255,255,255,0.1) !important;
+  background: transparent !important;
+}
+
+/* 3. Sidebar Nav Items Glow */
+.nav-item {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  border-radius: 12px !important;
+  margin-bottom: 6px !important;
+  position: relative;
+  overflow: hidden;
+}
+.nav-item:hover {
+  background: rgba(255,255,255,0.08) !important;
+  transform: translateX(4px);
+  color: #FFFFFF !important;
+}
+.nav-item.active {
+  background: rgba(18, 184, 134, 0.15) !important;
+  color: #34D399 !important;
+  box-shadow: inset 0 0 0 1px rgba(18, 184, 134, 0.3);
+}
+.nav-item.active::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 4px;
+  background: #34D399;
+  border-radius: 0 4px 4px 0;
+  box-shadow: 0 0 10px #34D399;
+}
+
+/* 4. Premium Cards */
+.card {
+  background: rgba(255, 255, 255, 0.7) !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.8) !important;
+  border-radius: 20px !important;
+  box-shadow: 0 4px 24px -6px rgba(15, 23, 42, 0.05), 0 0 0 1px rgba(15,23,42,0.02) !important;
+  transition: transform 0.3s ease, box-shadow 0.3s ease !important;
+}
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 32px -8px rgba(15, 23, 42, 0.08), 0 0 0 1px rgba(15,23,42,0.02) !important;
+}
+
+/* 5. Stat Cards Glow */
+.stat-card {
+  background: rgba(255, 255, 255, 0.8) !important;
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255,255,255,0.6) !important;
+  border-radius: 20px !important;
+  box-shadow: 0 4px 16px -4px rgba(15, 23, 42, 0.05) !important;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease !important;
+}
+.stat-card:hover {
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 20px 40px -10px rgba(18, 184, 134, 0.15) !important;
+}
+.stat-card::after {
+  content: '';
+  position: absolute;
+  top: 0; right: 0; left: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #12B886, #0CA678) !important;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.stat-card:hover::after {
+  opacity: 1;
+}
+
+/* 6. Buttons */
+.btn {
+  border-radius: 12px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.02em;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+.btn-primary {
+  background: linear-gradient(135deg, #12B886 0%, #087F5B 100%) !important;
+  box-shadow: 0 4px 12px rgba(18, 184, 134, 0.3) !important;
+  border: none !important;
+  color: white !important;
+}
+.btn-primary:hover {
+  box-shadow: 0 6px 20px rgba(18, 184, 134, 0.4) !important;
+  transform: translateY(-1px);
+}
+.btn-primary:active {
+  transform: translateY(1px);
+}
+
+/* 7. Input Fields */
+input, select, textarea {
+  border-radius: 10px !important;
+  background: rgba(255,255,255,0.8) !important;
+  border: 1.5px solid #E2E8F0 !important;
+  transition: all 0.2s ease !important;
+}
+input:focus, select:focus, textarea:focus {
+  background: #FFFFFF !important;
+  border-color: #12B886 !important;
+  box-shadow: 0 0 0 4px rgba(18, 184, 134, 0.15) !important;
+}
+
+/* 8. Modern Table */
+.table-wrapper {
+  border-radius: 16px !important;
+  overflow: hidden;
+  border: 1px solid rgba(226, 232, 240, 0.8) !important;
+}
+.data-table thead {
+  background: rgba(241, 245, 249, 0.7) !important;
+  backdrop-filter: blur(4px);
+}
+.data-table th {
+  font-weight: 700 !important;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  font-size: 11px !important;
+  color: #64748B !important;
+}
+.data-table tbody tr {
+  transition: background 0.2s ease !important;
+}
+.data-table tbody tr:hover {
+  background: rgba(248, 250, 252, 0.8) !important;
+}
+
+/* 9. Mobile Responsiveness */
+@media (max-width: 768px) {
+  .app-layout { overflow-x: hidden; }
+  .sidebar { 
+    transform: translateX(-100%); 
+    box-shadow: none;
+    border-right: none !important;
+  }
+  .sidebar.active { 
+    transform: translateX(0); 
+    box-shadow: 20px 0 40px rgba(0,0,0,0.2);
+  }
+  .main-content {
+    margin-left: 0 !important;
+    padding: 20px 16px !important;
+    width: 100vw;
+  }
+  .card { padding: 16px !important; border-radius: 16px !important; }
+  .stats-grid { grid-template-columns: 1fr !important; }
+  
+  /* Make tables horizontally scrollable without breaking page width */
+  .table-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    width: 100%;
+  }
+}

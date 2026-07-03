@@ -10,10 +10,8 @@ class Sidebar extends HTMLElement {
     const initial = user.name.charAt(0).toUpperCase();
     const currentPage = window.location.pathname.split('/').pop();
 
-    // Helper untuk menentukan apakah link aktif
     const active = (page) => currentPage === page ? 'active' : '';
 
-    // Menentukan akses berdasarkan role
     const isOwner       = user.role === 'owner';
     const isAdmin       = user.role === 'admin';
     const isBranchAdmin = user.role === 'branch_admin';
@@ -28,10 +26,11 @@ class Sidebar extends HTMLElement {
     const canSeeQueue       = isAdmin || isPetugas || isBranchAdmin;
 
     this.innerHTML = `
+      <div class="sidebar-overlay"></div>
       <aside class="sidebar">
         <div class="sidebar-header">
           <h2>🧺 KiloWash</h2>
-          <div style="font-size:10px;color:rgba(255,255,255,0.4);margin-top:2px;font-weight:500;letter-spacing:0.05em;">v2.0</div>
+          <div style="font-size:10px;color:var(--color-text-muted);margin-top:2px;font-weight:700;letter-spacing:0.05em;">v2.0</div>
         </div>
         <div class="sidebar-nav">
           <a href="dashboard.html" class="nav-item ${active('dashboard.html')}">📊 Dashboard</a>
@@ -48,19 +47,55 @@ class Sidebar extends HTMLElement {
             <div class="user-avatar">${initial}</div>
             <div class="user-info">
               <h4>${user.name}</h4>
-              <span>${user.role}</span>
+              <span>${user.role.replace('_', ' ')}</span>
             </div>
           </div>
-          <button class="logout-btn" id="logoutBtn">Keluar</button>
+          <button class="logout-btn" id="logoutBtn">🚪 Keluar</button>
         </div>
       </aside>
     `;
 
+    // Logout
     document.getElementById('logoutBtn').addEventListener('click', () => {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       window.location.href = 'login.html';
     });
+
+    // Mobile Menu Toggle Logic
+    setTimeout(() => {
+      const topbar = document.querySelector('.topbar');
+      if (topbar && !document.querySelector('.menu-toggle')) {
+        const btn = document.createElement('button');
+        btn.className = 'menu-toggle';
+        btn.innerHTML = '☰';
+        
+        // Find topbar-title to insert before it
+        const title = topbar.querySelector('.topbar-title');
+        if (title) {
+          const wrapper = document.createElement('div');
+          wrapper.className = 'topbar-header-row';
+          topbar.insertBefore(wrapper, title);
+          wrapper.appendChild(btn);
+          wrapper.appendChild(title);
+        } else {
+          topbar.insertBefore(btn, topbar.firstChild);
+        }
+
+        const sidebar = this.querySelector('.sidebar');
+        const overlay = this.querySelector('.sidebar-overlay');
+
+        btn.addEventListener('click', () => {
+          sidebar.classList.add('active');
+          overlay.classList.add('active');
+        });
+
+        overlay.addEventListener('click', () => {
+          sidebar.classList.remove('active');
+          overlay.classList.remove('active');
+        });
+      }
+    }, 100);
   }
 }
 

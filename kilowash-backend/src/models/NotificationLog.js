@@ -22,6 +22,12 @@ const NotificationLog = sequelize.define('NotificationLog', {
   status: {
     type: DataTypes.ENUM('terkirim', 'gagal'),
     allowNull: false
+  },
+  // FR-N3: Tipe notifikasi — 'registered' (order diterima) atau 'ready' (order selesai)
+  type: {
+    type: DataTypes.ENUM('registered', 'ready'),
+    allowNull: false,
+    defaultValue: 'ready'
   }
 }, {
   tableName: 'notification_logs',

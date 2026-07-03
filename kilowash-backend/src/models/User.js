@@ -21,8 +21,13 @@ const User = sequelize.define('User', {
     allowNull: false
   },
   role: {
-    type: DataTypes.ENUM('owner', 'admin', 'kasir', 'petugas'),
+    type: DataTypes.ENUM('owner', 'admin', 'branch_admin', 'kasir', 'petugas'),
     allowNull: false
+  },
+  // branch_id: diisi untuk branch_admin agar terikat ke cabang tertentu
+  branch_id: {
+    type: DataTypes.INTEGER,
+    allowNull: true
   },
   is_active: {
     type: DataTypes.BOOLEAN,

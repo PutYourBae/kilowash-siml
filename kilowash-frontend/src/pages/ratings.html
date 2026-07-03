@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Feedback Pelanggan | KiloWash</title>
+  <meta name="description" content="Rekap rating dan umpan balik pelanggan KiloWash per cabang dan per periode">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap">
+  <link rel="stylesheet" href="../styles/app.css">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%A7%BA%3C/text%3E%3C/svg%3E">
+  <style>
+    .star-display { color: #F59E0B; font-size: 16px; letter-spacing: 1px; }
+    .avg-score {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 52px;
+      font-weight: 800;
+      color: var(--color-text);
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+    .avg-sub { font-size: 13px; color: var(--color-text-muted); }
+    .dist-bar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; font-size: 13px; }
+    .dist-bar-label { width: 50px; color: var(--color-text-muted); }
+    .dist-bar-track { flex: 1; height: 8px; background: var(--color-border); border-radius: 99px; overflow: hidden; }
+    .dist-bar-fill  { height: 100%; background: #F59E0B; border-radius: 99px; transition: width .4s ease; }
+    .dist-bar-count { width: 30px; text-align: right; color: var(--color-text-muted); }
+    .flag-badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 99px; font-size: 11px; font-weight: 700; }
+    .flag-active   { background: #FEF2F2; color: #DC2626; }
+    .flag-inactive { background: var(--color-surface); color: var(--color-text-muted); border: 1px solid var(--color-border); }
+    .rating-stars-sm { color: #F59E0B; font-size: 14px; }
+    .filter-bar { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; align-items: center; }
+    .filter-bar select, .filter-bar input { padding: 8px 12px; border: 1px solid var(--color-border); border-radius: var(--radius-sm); background: var(--color-surface); color: var(--color-text); font-size: 13px; font-family: inherit; outline: none; }
+    .summary-grid { display: grid; grid-template-columns: 200px 1fr; gap: 20px; margin-bottom: 24px; }
+    @media (max-width: 640px) { .summary-grid { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <div class="app-layout">
+    <app-sidebar></app-sidebar>
+    <div class="main-content">
+      <div class="topbar">
+        <div class="topbar-title">
+          <h1>Feedback Pelanggan</h1>
+          <p>Rating & ulasan dari pelanggan setelah layanan selesai</p>
+        </div>
+      </div>
+
+      <div class="page-body">
+        <!-- Summary Section -->
+        <div class="summary-grid">
+          <!-- Score -->
+          <div class="card" style="text-align:center;padding:28px 20px;">
+            <div class="avg-score" id="avgScore">—</div>
+            <div class="star-display" id="avgStars">☆☆☆☆☆</div>
+            <div class="avg-sub" id="avgTotal">0 ulasan</div>
+          </div>
+          <!-- Distribution -->
+          <div class="card">
+            <div class="card-header" style="margin-bottom:16px;"><h3>Distribusi Bintang</h3></div>
+            <div id="distBars">
+              <div style="text-align:center;color:var(--color-text-muted);padding:20px">Memuat...</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Filter bar -->
+        <div class="filter-bar">
+          <select id="filterBranch" onchange="loadRatings()">
+            <option value="">Semua Cabang</option>
+          </select>
+          <select id="filterFlagged" onchange="loadRatings()">
+            <option value="">Semua Rating</option>
+            <option value="true">⚠️ Perlu Tindak Lanjut (≤ 2★)</option>
+          </select>
+          <input type="text" id="searchInput" placeholder="Cari nama / komentar..." oninput="debounceSearch()" style="min-width:220px;">
+        </div>
+
+        <!-- Ratings Table -->
+        <div class="card">
+          <div class="card-header">
+            <h3>Daftar Ulasan</h3>
+            <span id="countBadge" class="badge badge-muted">0 ulasan</span>
+          </div>
+          <div class="table-wrapper">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Tanggal</th>
+                  <th>Pelanggan</th>
+                  <th>Cabang</th>
+                  <th>Order</th>
+                  <th>Rating</th>
+                  <th>Komentar</th>
+                  <th>Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="ratingsTable">
+                <tr><td colspan="7" style="text-align:center;padding:40px;color:var(--color-text-muted)">Memuat data...</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <!-- Pagination -->
+          <div style="padding:16px 24px;display:flex;gap:12px;align-items:center;border-top:1px solid var(--color-border);">
+            <button class="btn btn-sm" id="btnPrev" onclick="changePage(-1)">← Prev</button>
+            <span id="pageInfo" style="font-size:13px;color:var(--color-text-muted)">Halaman 1</span>
+            <button class="btn btn-sm" id="btnNext" onclick="changePage(1)">Next →</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="../js/config.js"></script>
+  <script src="../js/app.js"></script>
+  <script>
+    const token = () => localStorage.getItem('token');
+    let currentPage = 1;
+    let totalPages  = 1;
+    let searchTimer = null;
+
+    async function apiFetch(path, options = {}) {
+      const res = await fetch(CONFIG.API_BASE + path, {
+        ...options,
+        headers: { 'Authorization': 'Bearer ' + token(), 'Content-Type': 'application/json', ...(options.headers || {}) }
+      });
+      return res.json();
+    }
+
+    async function loadBranchFilter() {
+      const data = await apiFetch('/branches');
+      if (!data.success) return;
+      const sel = document.getElementById('filterBranch');
+      data.data.forEach(b => {
+        const opt = document.createElement('option');
+        opt.value = b.id; opt.textContent = b.name;
+        sel.appendChild(opt);
+      });
+    }
+
+    async function loadRatings() {
+      currentPage = 1;
+      await fetchRatings();
+    }
+
+    async function fetchRatings() {
+      const branchId = document.getElementById('filterBranch').value;
+      const flagged  = document.getElementById('filterFlagged').value;
+      let url = `/ratings?page=${currentPage}&limit=15`;
+      if (branchId) url += `&branch_id=${branchId}`;
+      if (flagged)  url += `&flagged_only=${flagged}`;
+
+      const data = await apiFetch(url);
+      if (!data.success) return;
+
+      const { ratings, totalItems, totalPages: tp, summary } = data.data;
+      totalPages = tp;
+
+      // Summary
+      document.getElementById('avgScore').textContent = summary.total > 0 ? summary.average : '—';
+      document.getElementById('avgTotal').textContent = `${summary.total} ulasan`;
+      const avg = parseFloat(summary.average) || 0;
+      document.getElementById('avgStars').textContent = renderStarStr(avg);
+      renderDistribution(summary.distribution, summary.total);
+
+      document.getElementById('countBadge').textContent = `${totalItems} ulasan`;
+      document.getElementById('pageInfo').textContent = `Halaman ${currentPage} dari ${totalPages}`;
+      document.getElementById('btnPrev').disabled = currentPage <= 1;
+      document.getElementById('btnNext').disabled = currentPage >= totalPages;
+
+      if (ratings.length === 0) {
+        document.getElementById('ratingsTable').innerHTML =
+          '<tr><td colspan="7" style="text-align:center;padding:40px;color:var(--color-text-muted)">Belum ada ulasan.</td></tr>';
+        return;
+      }
+
+      const searchQuery = document.getElementById('searchInput').value.toLowerCase();
+      const filtered = searchQuery
+        ? ratings.filter(r =>
+            (r.Customer?.name || '').toLowerCase().includes(searchQuery) ||
+            (r.comment || '').toLowerCase().includes(searchQuery))
+        : ratings;
+
+      document.getElementById('ratingsTable').innerHTML = filtered.map(r => `
+        <tr>
+          <td style="white-space:nowrap;font-size:13px">${new Date(r.created_at).toLocaleDateString('id-ID', { day:'numeric', month:'short', year:'numeric' })}</td>
+          <td>
+            <div style="font-weight:600">${r.Customer?.name || '—'}</div>
+            <div style="font-size:12px;color:var(--color-text-muted)">${r.Customer?.phone || ''}</div>
+          </td>
+          <td style="font-size:13px">${r.Branch?.name || '—'}</td>
+          <td style="font-family:'Courier New',monospace;font-size:13px;color:var(--color-primary)">${r.Order?.order_code || '—'}</td>
+          <td>
+            <div class="rating-stars-sm">${'⭐'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)}</div>
+            ${r.is_flagged ? '<span class="flag-badge flag-active">⚠️ Follow Up</span>' : ''}
+          </td>
+          <td style="font-size:13px;color:var(--color-text-muted);max-width:200px">${r.comment || '<em>—</em>'}</td>
+          <td>
+            <button class="btn btn-sm ${r.is_flagged ? '' : 'btn-danger'}" onclick="toggleFlag(${r.id})" style="white-space:nowrap">
+              ${r.is_flagged ? '✓ Tandai Selesai' : '⚠️ Follow Up'}
+            </button>
+          </td>
+        </tr>`).join('');
+    }
+
+    function renderStarStr(avg) {
+      const full  = Math.floor(avg);
+      const half  = avg - full >= 0.5 ? 1 : 0;
+      const empty = 5 - full - half;
+      return '⭐'.repeat(full) + (half ? '✨' : '') + '☆'.repeat(empty);
+    }
+
+    function renderDistribution(dist, total) {
+      const bars = [5,4,3,2,1].map(star => {
+        const count = dist[star] || 0;
+        const pct   = total > 0 ? (count / total * 100).toFixed(0) : 0;
+        return `
+          <div class="dist-bar-row">
+            <div class="dist-bar-label">${star} ★</div>
+            <div class="dist-bar-track"><div class="dist-bar-fill" style="width:${pct}%"></div></div>
+            <div class="dist-bar-count">${count}</div>
+          </div>`;
+      }).join('');
+      document.getElementById('distBars').innerHTML = bars;
+    }
+
+    async function toggleFlag(id) {
+      const data = await apiFetch(`/ratings/${id}/flag`, { method: 'PATCH' });
+      if (data.success) fetchRatings();
+      else alert(data.message || 'Gagal mengubah status flag.');
+    }
+
+    function changePage(delta) {
+      currentPage = Math.max(1, Math.min(totalPages, currentPage + delta));
+      fetchRatings();
+    }
+
+    function debounceSearch() {
+      clearTimeout(searchTimer);
+      searchTimer = setTimeout(fetchRatings, 300);
+    }
+
+    // Init
+    loadBranchFilter().then(() => loadRatings());
+  </script>
+</body>
+</html>

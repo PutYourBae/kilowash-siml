@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manajemen Cabang | KiloWash</title>
+  <meta name="description" content="Kelola data cabang KiloWash untuk mendukung operasional multi-outlet">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap">
+  <link rel="stylesheet" href="../styles/app.css">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%A7%BA%3C/text%3E%3C/svg%3E">
+</head>
+<body>
+  <div class="app-layout">
+    <app-sidebar></app-sidebar>
+    <div class="main-content">
+      <div class="topbar">
+        <div class="topbar-title">
+          <h1>Manajemen Cabang</h1>
+          <p>Kelola data outlet & cabang KiloWash</p>
+        </div>
+        <div class="topbar-actions">
+          <button class="btn btn-primary" id="btnAddBranch" onclick="openModal()">+ Tambah Cabang</button>
+        </div>
+      </div>
+
+      <div class="page-body">
+        <!-- Stats Row -->
+        <div class="stats-grid" id="statsGrid" style="margin-bottom:24px;display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;">
+          <div class="stat-card" style="background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:20px 24px;">
+            <div class="stat-label" style="font-size:12px;font-weight:600;color:var(--color-text-muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;">Total Cabang</div>
+            <div class="stat-value" id="totalBranches" style="font-size:28px;font-weight:800;font-family:'Plus Jakarta Sans',sans-serif;color:var(--color-text);">—</div>
+          </div>
+          <div class="stat-card" style="background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:20px 24px;">
+            <div class="stat-label" style="font-size:12px;font-weight:600;color:var(--color-text-muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;">Cabang Aktif</div>
+            <div class="stat-value" id="activeBranches" style="font-size:28px;font-weight:800;font-family:'Plus Jakarta Sans',sans-serif;color:#12B886;">—</div>
+          </div>
+        </div>
+
+        <!-- Table -->
+        <div class="card">
+          <div class="card-header">
+            <h3>Daftar Cabang</h3>
+          </div>
+          <div class="table-wrapper">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Nama Cabang</th>
+                  <th>Alamat</th>
+                  <th>Telepon</th>
+                  <th>Status</th>
+                  <th>Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="branchTable">
+                <tr><td colspan="6" style="text-align:center;padding:40px;color:var(--color-text-muted)">Memuat data...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Tambah / Edit Cabang -->
+  <div class="modal-overlay" id="branchModal">
+    <div class="modal" style="max-width:480px;">
+      <div class="modal-header">
+        <h3 id="modalTitle">Tambah Cabang</h3>
+        <button class="modal-close" onclick="closeModal('branchModal')">✕</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="branchId">
+        <div class="form-group">
+          <label class="form-label">Nama Cabang *</label>
+          <input type="text" id="branchName" class="form-control" placeholder="Contoh: KiloWash Cabang Timur">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Alamat</label>
+          <textarea id="branchAddress" class="form-control" rows="2" placeholder="Jl. Contoh No. 1, Kota..."></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">No. Telepon</label>
+          <input type="text" id="branchPhone" class="form-control" placeholder="08xxxxxxxxxx">
+        </div>
+        <div class="form-group" id="activeGroup" style="display:none;">
+          <label class="form-label">Status</label>
+          <select id="branchActive" class="form-control">
+            <option value="true">Aktif</option>
+            <option value="false">Nonaktif</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn" onclick="closeModal('branchModal')">Batal</button>
+        <button class="btn btn-primary" id="btnSaveBranch" onclick="saveBranch()">Simpan</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="../js/config.js"></script>
+  <script src="../js/app.js"></script>
+  <script>
+    const token = () => localStorage.getItem('token');
+
+    async function apiFetch(path, options = {}) {
+      const res = await fetch(CONFIG.API_BASE + path, {
+        ...options,
+        headers: { 'Authorization': 'Bearer ' + token(), 'Content-Type': 'application/json', ...(options.headers || {}) }
+      });
+      return res.json();
+    }
+
+    async function loadBranches() {
+      const data = await apiFetch('/branches');
+      if (!data.success) return;
+      const branches = data.data;
+
+      document.getElementById('totalBranches').textContent = branches.length;
+      document.getElementById('activeBranches').textContent = branches.filter(b => b.is_active).length;
+
+      if (branches.length === 0) {
+        document.getElementById('branchTable').innerHTML = '<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--color-text-muted)">Belum ada cabang. Klik "+ Tambah Cabang" untuk memulai.</td></tr>';
+        return;
+      }
+
+      document.getElementById('branchTable').innerHTML = branches.map((b, i) => `
+        <tr>
+          <td>${i + 1}</td>
+          <td><strong>${b.name}</strong></td>
+          <td style="color:var(--color-text-muted);font-size:13px">${b.address || '—'}</td>
+          <td style="font-size:13px">${b.phone || '—'}</td>
+          <td>
+            <span class="badge ${b.is_active ? 'badge-success' : 'badge-muted'}">
+              ${b.is_active ? 'Aktif' : 'Nonaktif'}
+            </span>
+          </td>
+          <td>
+            <button class="btn btn-sm" onclick="openModal(${JSON.stringify(b).replace(/"/g, '&quot;')})">Edit</button>
+            ${b.is_active
+              ? `<button class="btn btn-sm btn-danger" onclick="deactivateBranch(${b.id})" style="margin-left:6px">Nonaktifkan</button>`
+              : ''}
+          </td>
+        </tr>`).join('');
+    }
+
+    function openModal(branch = null) {
+      document.getElementById('branchId').value      = branch ? branch.id : '';
+      document.getElementById('branchName').value    = branch ? branch.name : '';
+      document.getElementById('branchAddress').value = branch ? (branch.address || '') : '';
+      document.getElementById('branchPhone').value   = branch ? (branch.phone || '') : '';
+      document.getElementById('activeGroup').style.display = branch ? 'block' : 'none';
+      if (branch) document.getElementById('branchActive').value = String(branch.is_active);
+      document.getElementById('modalTitle').textContent = branch ? 'Edit Cabang' : 'Tambah Cabang';
+      document.getElementById('branchModal').classList.add('active');
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).classList.remove('active');
+    }
+
+    async function saveBranch() {
+      const id      = document.getElementById('branchId').value;
+      const name    = document.getElementById('branchName').value.trim();
+      const address = document.getElementById('branchAddress').value.trim();
+      const phone   = document.getElementById('branchPhone').value.trim();
+      const is_active = document.getElementById('branchActive').value === 'true';
+
+      if (!name) return alert('Nama cabang wajib diisi.');
+
+      const btn = document.getElementById('btnSaveBranch');
+      btn.disabled = true; btn.textContent = 'Menyimpan...';
+
+      const body = JSON.stringify({ name, address, phone, is_active });
+      const method = id ? 'PUT' : 'POST';
+      const path   = id ? `/branches/${id}` : '/branches';
+
+      const data = await apiFetch(path, { method, body });
+      btn.disabled = false; btn.textContent = 'Simpan';
+
+      if (data.success) {
+        closeModal('branchModal');
+        loadBranches();
+      } else {
+        alert(data.message || 'Gagal menyimpan cabang.');
+      }
+    }
+
+    async function deactivateBranch(id) {
+      if (!confirm('Nonaktifkan cabang ini? Data order tetap tersimpan.')) return;
+      const data = await apiFetch(`/branches/${id}`, { method: 'DELETE' });
+      if (data.success) loadBranches();
+      else alert(data.message || 'Gagal menonaktifkan cabang.');
+    }
+
+    loadBranches();
+  </script>
+</body>
+</html>

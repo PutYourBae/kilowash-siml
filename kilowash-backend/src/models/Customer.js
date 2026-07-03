@@ -14,6 +14,16 @@ const Customer = sequelize.define('Customer', {
   phone: {
     type: DataTypes.STRING(20),
     allowNull: false
+  },
+  // Total poin aktif yang dimiliki pelanggan saat ini
+  total_points: {
+    type: DataTypes.INTEGER,
+    defaultValue: 0
+  },
+  // Level membership berdasarkan akumulasi transaksi
+  membership_level: {
+    type: DataTypes.ENUM('reguler', 'silver', 'gold'),
+    defaultValue: 'reguler'
   }
 }, {
   tableName: 'customers',

@@ -6,8 +6,12 @@ const Order = require('./Order');
 const OrderStatusLog = require('./OrderStatusLog');
 const Payment = require('./Payment');
 const NotificationLog = require('./NotificationLog');
+// v2 — new models
+const Branch = require('./Branch');
+const LoyaltyPoint = require('./LoyaltyPoint');
+const Rating = require('./Rating');
 
-// Define associations
+// ─── v1 Associations ────────────────────────────────────────────
 
 // Order <-> Customer
 Customer.hasMany(Order, { foreignKey: 'customer_id' });
@@ -41,6 +45,36 @@ Payment.belongsTo(User, { foreignKey: 'paid_by', as: 'cashier' });
 Order.hasMany(NotificationLog, { foreignKey: 'order_id' });
 NotificationLog.belongsTo(Order, { foreignKey: 'order_id' });
 
+// ─── v2 Associations ────────────────────────────────────────────
+
+// Branch <-> Order (FR-B2)
+Branch.hasMany(Order, { foreignKey: 'branch_id' });
+Order.belongsTo(Branch, { foreignKey: 'branch_id' });
+
+// Branch <-> User (branch_admin terikat ke cabang)
+Branch.hasMany(User, { foreignKey: 'branch_id' });
+User.belongsTo(Branch, { foreignKey: 'branch_id' });
+
+// Customer <-> LoyaltyPoint
+Customer.hasMany(LoyaltyPoint, { foreignKey: 'customer_id' });
+LoyaltyPoint.belongsTo(Customer, { foreignKey: 'customer_id' });
+
+// Order <-> LoyaltyPoint
+Order.hasMany(LoyaltyPoint, { foreignKey: 'order_id' });
+LoyaltyPoint.belongsTo(Order, { foreignKey: 'order_id' });
+
+// Order <-> Rating (one-to-one, unique per order — FR-R2)
+Order.hasOne(Rating, { foreignKey: 'order_id' });
+Rating.belongsTo(Order, { foreignKey: 'order_id' });
+
+// Customer <-> Rating
+Customer.hasMany(Rating, { foreignKey: 'customer_id' });
+Rating.belongsTo(Customer, { foreignKey: 'customer_id' });
+
+// Branch <-> Rating
+Branch.hasMany(Rating, { foreignKey: 'branch_id' });
+Rating.belongsTo(Branch, { foreignKey: 'branch_id' });
+
 module.exports = {
   sequelize,
   User,
@@ -49,5 +83,9 @@ module.exports = {
   Order,
   OrderStatusLog,
   Payment,
-  NotificationLog
+  NotificationLog,
+  // v2
+  Branch,
+  LoyaltyPoint,
+  Rating
 };

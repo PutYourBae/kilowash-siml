@@ -3,43 +3,113 @@ require('dotenv').config();
 
 const WA_API_URL = process.env.WA_API_URL || 'https://api.fonnte.com/send';
 const WA_TOKEN = process.env.WA_TOKEN || '';
-const WA_SENDER = process.env.WA_SENDER || '';
+const TRACKING_BASE_URL = process.env.TRACKING_BASE_URL || 'https://kilowash.vercel.app';
 
-const buildMessage = (order) => {
+// ─── Helpers ───────────────────────────────────────────────────
+
+const formatRp = (n) =>
+  new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(n);
+
+const formatDate = (dateStr) => {
+  const d = new Date(dateStr);
+  return d.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+};
+
+/**
+ * Kirim pesan WA ke nomor target. Mengembalikan 'terkirim' atau 'gagal'.
+ */
+const sendWA = async (phone, message) => {
+  if (!WA_TOKEN) {
+    console.log(`[MOCK WA] To: ${phone}\n${message}`);
+    return 'terkirim';
+  }
+  try {
+    const response = await fetch(WA_API_URL, {
+      method: 'POST',
+      headers: { Authorization: WA_TOKEN, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ target: phone, message, countryCode: '62' })
+    });
+    const data = await response.json();
+    return data.status ? 'terkirim' : 'gagal';
+  } catch (err) {
+    console.error('[WA] Error:', err.message);
+    return 'gagal';
+  }
+};
+
+// ─── Message Builders ──────────────────────────────────────────
+
+/**
+ * Template pesan saat order pertama kali diterima (FR-N1, FR-N2).
+ */
+const buildRegisteredMessage = (order) => {
   const customerName = order.Customer.name;
   const orderCode = order.order_code;
   const serviceName = order.ServiceType.name;
   const weight = order.weight_kg;
-  const formatRp = (n) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(n);
   const totalPrice = formatRp(order.total_price);
-  
-  return `Halo ${customerName}! 🧺\nCucian Anda dengan kode order *${orderCode}* sudah selesai dan siap diambil.\n\n📦 *Detail Pesanan:*\n- Layanan: ${serviceName}\n- Berat: ${weight} Kg\n- Total Tagihan: *${totalPrice}*\n\nKami menerima pembayaran dalam bentuk Tunai, Transfer Bank, dan QRIS.\n\n📍 *KiloWash Laundry*\n⏰ Jam operasional: 07.00 – 21.00\n\nTerima kasih telah menggunakan layanan kami!`;
+  const estDate = formatDate(order.est_finish_date);
+  const trackingLink = `${TRACKING_BASE_URL}/src/pages/track.html?code=${orderCode}`;
+
+  return (
+    `Halo ${customerName}! 👋\n` +
+    `Terima kasih telah mempercayakan cucian Anda kepada *KiloWash Laundry*. Pesanan Anda telah kami terima dan sedang kami proses.\n\n` +
+    `📋 *Detail Pesanan:*\n` +
+    `- Kode Order: *${orderCode}*\n` +
+    `- Layanan: ${serviceName}\n` +
+    `- Berat/Jumlah: ${weight} ${order.ServiceType?.unit || 'Kg'}\n` +
+    `- Total Tagihan: *${totalPrice}*\n` +
+    `- Estimasi Selesai: ${estDate}\n\n` +
+    `🔍 Pantau progres cucian Anda kapan saja:\n${trackingLink}\n\n` +
+    `Mohon ditunggu ya, kami akan segera mengabari Anda begitu cucian selesai. Terima kasih! 🙏`
+  );
 };
 
+/**
+ * Template pesan saat order selesai dan siap diambil (existing — dipertahankan).
+ */
+const buildReadyMessage = (order) => {
+  const customerName = order.Customer.name;
+  const orderCode = order.order_code;
+  const serviceName = order.ServiceType.name;
+  const weight = order.weight_kg;
+  const totalPrice = formatRp(order.total_price);
+
+  return (
+    `Halo ${customerName}! 🧺\n` +
+    `Cucian Anda dengan kode order *${orderCode}* sudah selesai dan siap diambil.\n\n` +
+    `📦 *Detail Pesanan:*\n` +
+    `- Layanan: ${serviceName}\n` +
+    `- Berat: ${weight} Kg\n` +
+    `- Total Tagihan: *${totalPrice}*\n\n` +
+    `Kami menerima pembayaran dalam bentuk Tunai, Transfer Bank, dan QRIS.\n\n` +
+    `📍 *KiloWash Laundry*\n` +
+    `⏰ Jam operasional: 07.00 – 21.00\n\n` +
+    `Terima kasih telah menggunakan layanan kami! ⭐`
+  );
+};
+
+// ─── Exported Functions ────────────────────────────────────────
+
+/**
+ * Kirim notifikasi WA saat order pertama kali dibuat/diterima (FR-N1).
+ * Non-blocking — error tidak akan menghentikan flow pembuatan order (NFR-N1).
+ */
+exports.sendOrderRegisteredNotification = async (order) => {
+  const phone = order.Customer.phone;
+  const message = buildRegisteredMessage(order);
+  const status = await sendWA(phone, message);
+  await NotificationLog.create({ order_id: order.id, phone, message, status, type: 'registered' });
+  return status;
+};
+
+/**
+ * Kirim notifikasi WA saat order selesai (existing — dipertahankan untuk kompatibilitas).
+ */
 exports.sendOrderReadyNotification = async (order) => {
   const phone = order.Customer.phone;
-  const message = buildMessage(order);
-  let status = 'gagal';
-
-  // If no WA token configured, log as mock
-  if (!WA_TOKEN) {
-    console.log(`[MOCK WA] To: ${phone}\n${message}`);
-    status = 'terkirim';
-  } else {
-    try {
-      const response = await fetch(WA_API_URL, {
-        method: 'POST',
-        headers: { Authorization: WA_TOKEN, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ target: phone, message, countryCode: '62' })
-      });
-      const data = await response.json();
-      status = data.status ? 'terkirim' : 'gagal';
-    } catch (err) {
-      console.error('[WA] Error:', err.message);
-      status = 'gagal';
-    }
-  }
-
-  await NotificationLog.create({ order_id: order.id, phone, message, status });
+  const message = buildReadyMessage(order);
+  const status = await sendWA(phone, message);
+  await NotificationLog.create({ order_id: order.id, phone, message, status, type: 'ready' });
   return status;
 };

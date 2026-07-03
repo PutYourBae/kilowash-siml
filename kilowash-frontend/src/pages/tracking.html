@@ -9,7 +9,7 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    
+
     body {
       font-family: 'Inter', sans-serif;
       background: #0D1B2A;
@@ -24,18 +24,8 @@
     }
 
     /* Header */
-    .track-header {
-      text-align: center;
-      margin-bottom: 36px;
-    }
-
-    .track-logo {
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 20px;
-    }
-
+    .track-header { text-align: center; margin-bottom: 36px; }
+    .track-logo { display: inline-flex; align-items: center; gap: 10px; margin-bottom: 20px; }
     .track-logo-icon {
       width: 48px; height: 48px;
       background: linear-gradient(135deg, #12B886, #0CA678);
@@ -44,10 +34,8 @@
       font-size: 24px;
       box-shadow: 0 8px 20px rgba(18,184,134,0.4);
     }
-
     .track-logo-text h1 { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 22px; font-weight: 700; color: white; }
     .track-logo-text p  { font-size: 12px; color: rgba(255,255,255,0.5); }
-
     .track-headline { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 32px; font-weight: 800; color: white; margin-bottom: 10px; }
     .track-sub { font-size: 15px; color: rgba(255,255,255,0.5); }
 
@@ -61,20 +49,8 @@
       box-shadow: 0 20px 60px rgba(0,0,0,0.3);
       margin-bottom: 24px;
     }
-
-    .search-card label {
-      display: block;
-      font-size: 13px;
-      font-weight: 600;
-      color: #475569;
-      margin-bottom: 8px;
-    }
-
-    .search-row {
-      display: flex;
-      gap: 12px;
-    }
-
+    .search-card label { display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 8px; }
+    .search-row { display: flex; gap: 12px; }
     .search-input {
       flex: 1;
       padding: 13px 16px;
@@ -86,9 +62,7 @@
       color: #0F172A;
       transition: border-color .2s, box-shadow .2s;
     }
-
     .search-input:focus { border-color: #12B886; box-shadow: 0 0 0 3px rgba(18,184,134,0.12); }
-
     .btn-track {
       padding: 13px 24px;
       background: #12B886;
@@ -103,7 +77,6 @@
       transition: background .2s;
       box-shadow: 0 4px 14px rgba(18,184,134,0.35);
     }
-
     .btn-track:hover { background: #0CA678; }
     .btn-track:disabled { background: #94A3B8; cursor: not-allowed; }
 
@@ -111,14 +84,12 @@
     .result-card {
       background: white;
       border-radius: 20px;
-      padding: 0;
       width: 100%;
       max-width: 560px;
       box-shadow: 0 20px 60px rgba(0,0,0,0.25);
       display: none;
       overflow: hidden;
     }
-
     .result-top {
       background: linear-gradient(135deg, #0D1B2A, #1a3a4a);
       padding: 24px;
@@ -127,11 +98,9 @@
       justify-content: space-between;
       align-items: center;
     }
-
     .result-code { font-family: 'Courier New', monospace; font-size: 18px; font-weight: 700; color: #12B886; }
     .result-name { font-size: 15px; font-weight: 600; margin-top: 4px; }
     .result-meta { font-size: 12px; color: rgba(255,255,255,0.5); margin-top: 2px; }
-
     .status-pill {
       padding: 8px 18px;
       border-radius: 9999px;
@@ -139,33 +108,34 @@
       font-weight: 700;
       text-transform: capitalize;
     }
-
     .sp-diterima { background: rgba(59,130,246,0.15); color: #93C5FD; }
     .sp-proses   { background: rgba(245,158,11,0.15); color: #FCD34D; }
     .sp-selesai  { background: rgba(16,185,129,0.15); color: #6EE7B7; }
     .sp-diambil  { background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.6); }
 
     .result-body { padding: 28px; }
-
-    .est-row {
-      display: flex;
-      gap: 12px;
-      margin-bottom: 24px;
-    }
-
-    .est-box {
-      flex: 1;
-      background: #F0F4F8;
-      border-radius: 12px;
-      padding: 14px 16px;
-    }
-
+    .est-row { display: flex; gap: 12px; margin-bottom: 24px; }
+    .est-box { flex: 1; background: #F0F4F8; border-radius: 12px; padding: 14px 16px; }
     .est-label { font-size: 11px; color: #94A3B8; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
     .est-value { font-size: 14px; font-weight: 700; color: #0F172A; }
+    .est-value.discount { font-size: 12px; color: #12B886; font-weight: 500; margin-top: 2px; }
+
+    /* Branch info */
+    .branch-info {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: #F0F4F8;
+      border-radius: 10px;
+      padding: 10px 14px;
+      margin-bottom: 20px;
+      font-size: 13px;
+      color: #475569;
+    }
+    .branch-info-icon { font-size: 16px; }
 
     /* Timeline */
     .timeline-title { font-size: 12px; font-weight: 600; color: #94A3B8; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 20px; }
-
     .track-steps {
       display: flex;
       flex-direction: column;
@@ -173,7 +143,6 @@
       position: relative;
       padding-left: 32px;
     }
-
     .track-steps::before {
       content: '';
       position: absolute;
@@ -183,14 +152,8 @@
       width: 2px;
       background: #E2E8F0;
     }
-
-    .track-step {
-      position: relative;
-      padding-bottom: 24px;
-    }
-
+    .track-step { position: relative; padding-bottom: 24px; }
     .track-step:last-child { padding-bottom: 0; }
-
     .step-dot {
       position: absolute;
       left: -24px;
@@ -204,19 +167,91 @@
       display: flex; align-items: center; justify-content: center;
       font-size: 9px;
     }
-
-    .step-dot.done { background: #12B886; box-shadow: 0 0 0 3px rgba(18,184,134,0.2); }
+    .step-dot.done    { background: #12B886; box-shadow: 0 0 0 3px rgba(18,184,134,0.2); }
     .step-dot.current { background: #FF6B35; box-shadow: 0 0 0 4px rgba(255,107,53,0.2); animation: pulse 1.5s infinite; }
-
     @keyframes pulse {
       0%,100% { box-shadow: 0 0 0 4px rgba(255,107,53,0.2); }
       50%      { box-shadow: 0 0 0 8px rgba(255,107,53,0.05); }
     }
-
     .step-title { font-size: 14px; font-weight: 700; color: #0F172A; text-transform: capitalize; margin-bottom: 3px; }
     .step-title.inactive { color: #CBD5E1; }
     .step-desc  { font-size: 12px; color: #94A3B8; line-height: 1.5; }
     .step-time  { font-size: 11px; color: #94A3B8; margin-top: 3px; font-style: italic; }
+
+    /* ─── Rating Section ─── */
+    .rating-section {
+      margin-top: 28px;
+      padding-top: 24px;
+      border-top: 1.5px dashed #E2E8F0;
+    }
+    .rating-section-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: #475569;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .rating-done-msg {
+      text-align: center;
+      padding: 20px;
+      background: #F0FDF4;
+      border-radius: 12px;
+      font-size: 14px;
+      color: #16A34A;
+      font-weight: 600;
+    }
+    .star-row {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      margin-bottom: 16px;
+    }
+    .star-btn {
+      font-size: 36px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      filter: grayscale(1) opacity(0.3);
+      transition: filter .15s, transform .15s;
+      line-height: 1;
+    }
+    .star-btn.active { filter: grayscale(0) opacity(1); transform: scale(1.15); }
+    .star-btn:hover  { filter: grayscale(0) opacity(0.8); }
+    .rating-comment {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1.5px solid #E2E8F0;
+      border-radius: 10px;
+      font-size: 13px;
+      font-family: 'Inter', sans-serif;
+      color: #0F172A;
+      resize: none;
+      outline: none;
+      transition: border-color .2s;
+      margin-bottom: 14px;
+    }
+    .rating-comment:focus { border-color: #12B886; }
+    .btn-submit-rating {
+      width: 100%;
+      padding: 12px;
+      background: linear-gradient(135deg, #12B886, #0CA678);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      cursor: pointer;
+      transition: opacity .2s;
+      box-shadow: 0 4px 14px rgba(18,184,134,0.35);
+    }
+    .btn-submit-rating:hover    { opacity: 0.9; }
+    .btn-submit-rating:disabled { background: #94A3B8; cursor: not-allowed; box-shadow: none; }
+    .rating-hint { font-size: 12px; color: #94A3B8; text-align: center; margin-bottom: 14px; }
 
     .footer-note { margin-top: 24px; text-align: center; font-size: 12px; color: rgba(255,255,255,0.35); }
     .footer-note a { color: rgba(18,184,134,0.7); }
@@ -227,7 +262,6 @@
     }
   </style>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%A7%BA%3C/text%3E%3C/svg%3E">
-  <meta name="view-transition" content="same-origin">
 </head>
 <body>
   <div class="track-header">
@@ -268,11 +302,25 @@
         <div class="est-box">
           <div class="est-label">Total Tagihan</div>
           <div class="est-value" id="resTotal">—</div>
+          <div class="est-value discount" id="resDiscount" style="display:none"></div>
         </div>
+      </div>
+
+      <div class="branch-info" id="resBranch" style="display:none">
+        <span class="branch-info-icon">📍</span>
+        <span id="resBranchName">—</span>
       </div>
 
       <div class="timeline-title">Riwayat Status</div>
       <div class="track-steps" id="trackSteps"></div>
+
+      <!-- Rating Section (FR-R1): hanya tampil jika order selesai/diambil -->
+      <div class="rating-section" id="ratingSection" style="display:none">
+        <div class="rating-section-title">⭐ Beri Penilaian</div>
+        <div id="ratingContent">
+          <!-- Diisi secara dinamis -->
+        </div>
+      </div>
     </div>
   </div>
 
@@ -284,12 +332,26 @@
   <script src="../js/config.js"></script>
   <script>
     const statusConfig = {
-      diterima:  { label: 'Diterima',  desc: 'Pesanan diterima & menunggu antrian cuci.',          pill: 'sp-diterima' },
-      proses:    { label: 'Proses',    desc: 'Pakaian sedang dalam proses pencucian & penyetrikaan.', pill: 'sp-proses' },
-      selesai:   { label: 'Selesai',   desc: 'Cucian siap! Silakan diambil di outlet KiloWash.',    pill: 'sp-selesai' },
-      diambil:   { label: 'Diambil',   desc: 'Cucian sudah diambil. Terima kasih! 🙏',             pill: 'sp-diambil' },
+      diterima: { label: 'Diterima',  desc: 'Pesanan diterima & menunggu antrian cuci.', pill: 'sp-diterima' },
+      proses:   { label: 'Proses',    desc: 'Pakaian sedang dalam proses pencucian & penyetrikaan.', pill: 'sp-proses' },
+      selesai:  { label: 'Selesai',   desc: 'Cucian siap! Silakan diambil di outlet KiloWash.', pill: 'sp-selesai' },
+      diambil:  { label: 'Diambil',   desc: 'Cucian sudah diambil. Terima kasih! 🙏', pill: 'sp-diambil' },
     };
     const allStatuses = ['diterima', 'proses', 'selesai', 'diambil'];
+    const formatRp = n => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(n);
+
+    let currentOrderCode = null;
+    let selectedRating = 0;
+
+    // Auto-lacak jika ada ?code= di URL
+    window.addEventListener('DOMContentLoaded', () => {
+      const params = new URLSearchParams(window.location.search);
+      const code = params.get('code');
+      if (code) {
+        document.getElementById('codeInput').value = code;
+        doTrack();
+      }
+    });
 
     document.getElementById('btnTrack').addEventListener('click', doTrack);
     document.getElementById('codeInput').addEventListener('keydown', e => { if (e.key === 'Enter') doTrack(); });
@@ -297,12 +359,13 @@
     async function doTrack() {
       const code = document.getElementById('codeInput').value.trim();
       if (!code) return;
+      currentOrderCode = code;
 
       const btn = document.getElementById('btnTrack');
       btn.textContent = '⏳'; btn.disabled = true;
 
       try {
-        const res = await fetch(`${CONFIG.API_BASE}/track/${encodeURIComponent(code)}`);
+        const res  = await fetch(`${CONFIG.API_BASE}/track/${encodeURIComponent(code)}`);
         const data = await res.json();
 
         if (res.ok && data.success) {
@@ -317,19 +380,42 @@
       }
     }
 
-    function renderResult(d) {
+    async function renderResult(d) {
+      // Header info
       document.getElementById('resCode').textContent = d.order_code;
       document.getElementById('resName').textContent = d.customer_name;
       document.getElementById('resMeta').textContent = `${d.service_name} · ${d.weight_kg} Kg`;
-      document.getElementById('resTotal').textContent = new Intl.NumberFormat('id-ID', {style:'currency',currency:'IDR',minimumFractionDigits:0}).format(d.total_price);
-      document.getElementById('resEst').textContent  = new Date(d.est_finish_date).toLocaleDateString('id-ID', {weekday:'short',day:'numeric',month:'short',year:'numeric'});
+      document.getElementById('resTotal').textContent = formatRp(d.total_price);
 
-      const cfg = statusConfig[d.status] || { pill: '' };
+      const discount = parseFloat(d.discount_from_points || 0);
+      const discountEl = document.getElementById('resDiscount');
+      if (discount > 0) {
+        discountEl.textContent = `Hemat ${formatRp(discount)} dari poin`;
+        discountEl.style.display = 'block';
+      } else {
+        discountEl.style.display = 'none';
+      }
+
+      document.getElementById('resEst').textContent =
+        new Date(d.est_finish_date).toLocaleDateString('id-ID', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
+
+      // Branch info
+      const branchEl = document.getElementById('resBranch');
+      if (d.branch && d.branch.name) {
+        document.getElementById('resBranchName').textContent = d.branch.name + (d.branch.address ? ` — ${d.branch.address}` : '');
+        branchEl.style.display = 'flex';
+      } else {
+        branchEl.style.display = 'none';
+      }
+
+      // Status pill
+      const cfg  = statusConfig[d.status] || { pill: '' };
       const pill = document.getElementById('resStatusPill');
       pill.textContent = cfg.label || d.status;
-      pill.className = 'status-pill ' + cfg.pill;
+      pill.className   = 'status-pill ' + cfg.pill;
 
-      const curIdx = allStatuses.indexOf(d.status);
+      // Timeline
+      const curIdx  = allStatuses.indexOf(d.status);
       const logsMap = {};
       (d.logs || []).forEach(l => { logsMap[l.new_status] = l; });
 
@@ -338,27 +424,130 @@
         const isDone = i < curIdx;
         const isCur  = i === curIdx;
         const log    = logsMap[s];
-
-        const dotClass = isDone ? 'done' : (isCur ? 'current' : '');
-        const dotInner = isDone ? '✓' : (isCur ? '●' : '');
+        const dotClass   = isDone ? 'done' : (isCur ? 'current' : '');
+        const dotInner   = isDone ? '✓' : (isCur ? '●' : '');
         const titleClass = !isDone && !isCur ? 'inactive' : '';
-        const timeStr = log ? new Date(log.changed_at || log.createdAt).toLocaleString('id-ID', {day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}) : '';
-
+        const timeStr = log ? new Date(log.changed_at || log.createdAt).toLocaleString('id-ID',
+          { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : '';
         return `
           <div class="track-step">
             <div class="step-dot ${dotClass}">${dotInner}</div>
             <div class="step-title ${titleClass}">${sCfg.label}</div>
             <div class="step-desc">${sCfg.desc}</div>
             ${timeStr ? `<div class="step-time">${timeStr}</div>` : ''}
-          </div>
-        `;
+          </div>`;
       }).join('');
 
       document.getElementById('trackSteps').innerHTML = stepsHtml;
       document.getElementById('resultCard').style.display = 'block';
+
+      // FR-R1: Tampilkan form rating jika sudah selesai atau diambil
+      if (['selesai', 'diambil'].includes(d.status)) {
+        await loadRatingSection(d.order_code);
+      } else {
+        document.getElementById('ratingSection').style.display = 'none';
+      }
+
       document.getElementById('resultCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    // ─── Rating Section ─────────────────────────────────────────
+
+    async function loadRatingSection(orderCode) {
+      const section = document.getElementById('ratingSection');
+      const content = document.getElementById('ratingContent');
+      section.style.display = 'block';
+
+      try {
+        const res  = await fetch(`${CONFIG.API_BASE}/ratings/check/${encodeURIComponent(orderCode)}`);
+        const data = await res.json();
+
+        if (data.success && data.data.has_rated) {
+          // Sudah pernah rating — tampilkan hasil
+          content.innerHTML = renderExistingRating(data.data);
+        } else {
+          // Belum rating — tampilkan form
+          content.innerHTML = renderRatingForm();
+          initStars();
+        }
+      } catch {
+        content.innerHTML = '<p style="font-size:13px;color:#94A3B8;">Tidak dapat memuat form penilaian.</p>';
+      }
+    }
+
+    function renderExistingRating(data) {
+      const stars = '⭐'.repeat(data.rating) + '☆'.repeat(5 - data.rating);
+      return `
+        <div class="rating-done-msg">
+          <div style="font-size:28px;margin-bottom:8px">${stars}</div>
+          <div>Anda telah memberikan <strong>${data.rating} bintang</strong></div>
+          ${data.comment ? `<div style="font-size:13px;margin-top:6px;color:#475569">"${data.comment}"</div>` : ''}
+        </div>`;
+    }
+
+    function renderRatingForm() {
+      return `
+        <p class="rating-hint">Bagaimana pengalaman Anda dengan layanan kami?</p>
+        <div class="star-row" id="starRow">
+          ${[1,2,3,4,5].map(i => `<button class="star-btn" data-star="${i}" id="star${i}" aria-label="${i} bintang">⭐</button>`).join('')}
+        </div>
+        <textarea class="rating-comment" id="ratingComment" rows="3" placeholder="Komentar Anda (opsional)..."></textarea>
+        <button class="btn-submit-rating" id="btnSubmitRating" disabled>Kirim Penilaian</button>`;
+    }
+
+    function initStars() {
+      selectedRating = 0;
+      document.querySelectorAll('.star-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          selectedRating = parseInt(btn.dataset.star, 10);
+          updateStarDisplay();
+          document.getElementById('btnSubmitRating').disabled = false;
+        });
+        btn.addEventListener('mouseover', () => highlightStars(parseInt(btn.dataset.star, 10)));
+        btn.addEventListener('mouseout', () => updateStarDisplay());
+      });
+      document.getElementById('btnSubmitRating').addEventListener('click', submitRating);
+    }
+
+    function highlightStars(n) {
+      document.querySelectorAll('.star-btn').forEach(b => {
+        b.classList.toggle('active', parseInt(b.dataset.star, 10) <= n);
+      });
+    }
+
+    function updateStarDisplay() {
+      document.querySelectorAll('.star-btn').forEach(b => {
+        b.classList.toggle('active', parseInt(b.dataset.star, 10) <= selectedRating);
+      });
+    }
+
+    async function submitRating() {
+      if (!selectedRating) return;
+      const comment = document.getElementById('ratingComment').value.trim();
+      const btn = document.getElementById('btnSubmitRating');
+      btn.disabled = true;
+      btn.textContent = 'Mengirim...';
+
+      try {
+        const res = await fetch(`${CONFIG.API_BASE}/ratings`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ order_code: currentOrderCode, rating: selectedRating, comment })
+        });
+        const data = await res.json();
+        if (res.ok && data.success) {
+          document.getElementById('ratingContent').innerHTML = renderExistingRating({ rating: selectedRating, comment });
+        } else {
+          alert(data.message || 'Gagal mengirim penilaian.');
+          btn.disabled = false;
+          btn.textContent = 'Kirim Penilaian';
+        }
+      } catch {
+        alert('Tidak dapat terhubung ke server.');
+        btn.disabled = false;
+        btn.textContent = 'Kirim Penilaian';
+      }
     }
   </script>
 </body>
 </html>
-

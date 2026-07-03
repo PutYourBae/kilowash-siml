@@ -20,6 +20,11 @@ const Order = sequelize.define('Order', {
     type: DataTypes.INTEGER,
     allowNull: false
   },
+  // FK ke cabang asal order (FR-B2)
+  branch_id: {
+    type: DataTypes.INTEGER,
+    allowNull: true
+  },
   weight_kg: {
     type: DataTypes.DECIMAL(5, 2),
     allowNull: false
@@ -27,6 +32,16 @@ const Order = sequelize.define('Order', {
   total_price: {
     type: DataTypes.DECIMAL(10, 2),
     allowNull: false
+  },
+  // Diskon dari penukaran poin (FR-M2)
+  discount_from_points: {
+    type: DataTypes.DECIMAL(10, 2),
+    defaultValue: 0
+  },
+  // Jumlah poin yang ditukar pada order ini
+  points_redeemed: {
+    type: DataTypes.INTEGER,
+    defaultValue: 0
   },
   notes: {
     type: DataTypes.TEXT,

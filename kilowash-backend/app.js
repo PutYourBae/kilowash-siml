@@ -7,7 +7,7 @@ const cors = require('cors');
 const rateLimit = require('express-rate-limit');
 const sequelize = require('./src/config/database');
 
-// Import models agar terdaftar
+// Import models agar terdaftar (termasuk v2: Branch, LoyaltyPoint, Rating)
 require('./src/models/index');
 
 const app = express();
@@ -38,26 +38,36 @@ const loginLimiter = rateLimit({
   message: { success: false, message: 'Terlalu banyak percobaan login, harap tunggu 15 menit' }
 });
 
-// Import Routes
-const authRoutes = require('./src/routes/auth');
-const masterRoutes = require('./src/routes/master');
-const orderRoutes = require('./src/routes/orders');
-const trackRoutes = require('./src/routes/track');
-const paymentRoutes = require('./src/routes/payments');
-const reportRoutes = require('./src/routes/reports');
+// ─── Import Routes ───────────────────────────────────────────────
+// v1
+const authRoutes         = require('./src/routes/auth');
+const masterRoutes       = require('./src/routes/master');
+const orderRoutes        = require('./src/routes/orders');
+const trackRoutes        = require('./src/routes/track');
+const paymentRoutes      = require('./src/routes/payments');
+const reportRoutes       = require('./src/routes/reports');
 const notificationRoutes = require('./src/routes/notifications');
+// v2
+const branchRoutes       = require('./src/routes/branches');
+const loyaltyRoutes      = require('./src/routes/loyalty');
+const ratingRoutes       = require('./src/routes/ratings');
 
-// Setup Routes
-app.use('/api/auth', loginLimiter, authRoutes); // Terapkan loginLimiter khusus di sini
-app.use('/api/master', masterRoutes);
-app.use('/api/orders', orderRoutes);
-app.use('/api/track', trackRoutes);
-app.use('/api/payments', paymentRoutes);
-app.use('/api/reports', reportRoutes);
+// ─── Setup Routes ────────────────────────────────────────────────
+// v1
+app.use('/api/auth',          loginLimiter, authRoutes);
+app.use('/api/master',        masterRoutes);
+app.use('/api/orders',        orderRoutes);
+app.use('/api/track',         trackRoutes);
+app.use('/api/payments',      paymentRoutes);
+app.use('/api/reports',       reportRoutes);
 app.use('/api/notifications', notificationRoutes);
+// v2
+app.use('/api/branches',      branchRoutes);
+app.use('/api/loyalty',       loyaltyRoutes);
+app.use('/api/ratings',       ratingRoutes);
 
 app.get('/', (req, res) => {
-  res.json({ message: 'SIML-KiloWash API v1.0 — OK' });
+  res.json({ message: 'SIML-KiloWash API v2.0 — OK' });
 });
 
 // 404 Handler

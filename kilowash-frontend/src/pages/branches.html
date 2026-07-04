@@ -19,7 +19,7 @@
           <p>Kelola data outlet & cabang KiloWash</p>
         </div>
         <div class="topbar-actions">
-          <button class="btn btn-primary" id="btnAddBranch" onclick="openModal()">+ Tambah Cabang</button>
+          <button class="btn btn-primary" id="btnAddBranch" onclick="openBranchForm()">+ Tambah Cabang</button>
         </div>
       </div>
 
@@ -135,7 +135,7 @@
             </span>
           </td>
           <td>
-            <button class="btn btn-sm" onclick="openModal(${JSON.stringify(b).replace(/"/g, '&quot;')})">Edit</button>
+            <button class="btn btn-sm" onclick="openBranchForm(${JSON.stringify(b).replace(/"/g, '&quot;')})">Edit</button>
             ${b.is_active
               ? `<button class="btn btn-sm btn-danger" onclick="deactivateBranch(${b.id})" style="margin-left:6px">Nonaktifkan</button>`
               : ''}
@@ -143,7 +143,7 @@
         </tr>`).join('');
     }
 
-    function openModal(branch = null) {
+    function openBranchForm(branch = null) {
       document.getElementById('branchId').value      = branch ? branch.id : '';
       document.getElementById('branchName').value    = branch ? branch.name : '';
       document.getElementById('branchAddress').value = branch ? (branch.address || '') : '';
@@ -151,11 +151,7 @@
       document.getElementById('activeGroup').style.display = branch ? 'block' : 'none';
       if (branch) document.getElementById('branchActive').value = String(branch.is_active);
       document.getElementById('modalTitle').textContent = branch ? 'Edit Cabang' : 'Tambah Cabang';
-      document.getElementById('branchModal').classList.add('active');
-    }
-
-    function closeModal(id) {
-      document.getElementById(id).classList.remove('active');
+      openModal('branchModal');
     }
 
     async function saveBranch() {

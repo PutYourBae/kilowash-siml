@@ -10,6 +10,7 @@ Oleh karena itu, KiloWash v2 dikembangkan sebagai kelanjutan dari proyek capston
 3. Mengumpulkan umpan balik pelanggan (Rating & Feedback) guna menjaga kualitas layanan.
 4. Memperkaya komunikasi otomatis melalui notifikasi WhatsApp di berbagai fase pesanan.
 5. Memastikan keamanan data tingkat tinggi dengan implementasi Row Level Security (RLS) di database.
+6. Memusatkan manajemen data (Data Master) untuk menyederhanakan antarmuka pengguna (UI/UX) dan meningkatkan skalabilitas.
 
 ---
 
@@ -35,13 +36,15 @@ Merespons deteksi celah keamanan dari *Supabase Security Advisor*, Row Level Sec
 
 ## Bab 3: Implementasi Fitur Utama
 
-### 3.1 Manajemen Multi-Cabang
-- **Deskripsi**: Owner dapat menambah, mengedit, dan menonaktifkan cabang. Admin dan Kasir beroperasi pada konteks cabangnya masing-masing.
-- **Hak Akses**: Menggunakan peran `branch_admin` (Admin Cabang) yang dibatasi visibilitas ordernya ke cabang tempatnya bertugas.
+### 3.1 Manajemen Multi-Cabang & Hak Akses Terpusat
+- **Deskripsi**: Pada pengembangan awal, peran khusus `branch_admin` digunakan untuk mengelola cabang. Kini, fungsionalitas telah dikembangkan menjadi **Penugasan Cabang Fleksibel**. Seluruh peran (`admin`, `kasir`, dan `petugas`) dapat ditugaskan secara spesifik ke satu cabang atau bertugas secara silang (pusat).
+- **Hak Akses & Keamanan**: Jika seorang staf (misal Kasir) ditugaskan di Cabang A, sistem secara otomatis akan mengunci halaman **Daftar Order** dan **Laporan** hanya untuk data dari Cabang A. Sebaliknya, akun *Owner* (atau pusat) tetap dapat menggunakan *dropdown filter* untuk melihat dan mengelola data lintas cabang.
+- **Data Master Terpusat**: Seluruh manajemen konfigurasi, mulai dari Layanan, Cabang, Karyawan, hingga Pelanggan (Member) digabungkan dalam satu modul antarmuka yang rapi dan terpusat ("Data Master"), mengurangi redundansi halaman.
 
-### 3.2 Sistem Loyalitas (Membership & Points)
-- **Deskripsi**: Pelanggan mendapatkan poin berdasarkan total transaksi (misalnya 1 Poin per Rp10.000). Poin tersebut dapat ditukar (redeem) menjadi diskon pada pesanan berikutnya.
-- **Klasifikasi**: Berdasarkan akumulasi poin, pelanggan diklasifikasikan ke dalam tier keanggotaan (Regular, Silver, Gold).
+### 3.2 Sistem Loyalitas (Membership & Points) & Autofill Order
+- **Deskripsi**: Pelanggan mendapatkan poin berdasarkan total transaksi (misalnya 1 Poin per Rp100). Poin tersebut dapat ditukar (redeem) menjadi diskon pada pesanan berikutnya.
+- **Klasifikasi**: Berdasarkan akumulasi poin, pelanggan diklasifikasikan ke dalam tier keanggotaan (Reguler, Silver, Gold).
+- **Order Autofill**: Kasir difasilitasi dengan *dropdown* pencarian cerdas pada form Order Baru. Jika pelanggan adalah member terdaftar, kasir hanya perlu memilih nama dari *dropdown*, dan sistem akan melakukan *autofill* (pengisian otomatis) pada kolom Nama dan Nomor WhatsApp. Ini mempercepat dan mengurangi kesalahan input (human error).
 
 ### 3.3 Penilaian dan Umpan Balik (Rating System)
 - **Deskripsi**: Pelanggan yang pesanannya telah selesai atau diambil dapat memberikan penilaian bintang (1-5) dan komentar pada halaman pelacakan (*tracking*).

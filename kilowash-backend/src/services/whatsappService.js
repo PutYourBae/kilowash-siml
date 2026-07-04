@@ -15,26 +15,53 @@ const formatDate = (dateStr) => {
   return d.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
 };
 
+const https = require('https');
+
 /**
- * Kirim pesan WA ke nomor target. Mengembalikan 'terkirim' atau 'gagal'.
+ * Kirim pesan WA ke nomor target menggunakan native https (kompatibel semua versi Node.js).
  */
-const sendWA = async (phone, message) => {
-  if (!WA_TOKEN) {
-    console.log(`[MOCK WA] To: ${phone}\n${message}`);
-    return 'terkirim';
-  }
-  try {
-    const response = await fetch(WA_API_URL, {
+const sendWA = (phone, message) => {
+  return new Promise((resolve) => {
+    if (!WA_TOKEN) {
+      console.log(`[MOCK WA] To: ${phone}\n${message}`);
+      return resolve('terkirim');
+    }
+
+    const payload = JSON.stringify({ target: phone, message, countryCode: '62' });
+    const options = {
+      hostname: 'api.fonnte.com',
+      path: '/send',
       method: 'POST',
-      headers: { Authorization: WA_TOKEN, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ target: phone, message, countryCode: '62' })
+      headers: {
+        'Authorization': WA_TOKEN,
+        'Content-Type': 'application/json',
+        'Content-Length': Buffer.byteLength(payload)
+      }
+    };
+
+    const req = https.request(options, (res) => {
+      let body = '';
+      res.on('data', (chunk) => body += chunk);
+      res.on('end', () => {
+        try {
+          const data = JSON.parse(body);
+          if (!data.status) console.error('[WA] Fonnte error detail:', data);
+          resolve(data.status ? 'terkirim' : 'gagal');
+        } catch (e) {
+          console.error('[WA] Parse response error:', e);
+          resolve('gagal');
+        }
+      });
     });
-    const data = await response.json();
-    return data.status ? 'terkirim' : 'gagal';
-  } catch (err) {
-    console.error('[WA] Error:', err.message);
-    return 'gagal';
-  }
+
+    req.on('error', (err) => {
+      console.error('[WA] HTTPS request error:', err);
+      resolve('gagal');
+    });
+
+    req.write(payload);
+    req.end();
+  });
 };
 
 // ─── Message Builders ──────────────────────────────────────────

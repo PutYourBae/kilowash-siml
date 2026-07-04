@@ -77,10 +77,11 @@ const buildRegisteredMessage = (order) => {
   const totalPrice = formatRp(order.total_price);
   const estDate = formatDate(order.est_finish_date);
   const trackingLink = `${TRACKING_BASE_URL}/src/pages/tracking.html?code=${orderCode}`;
+  const branchName = order.Branch ? order.Branch.name : 'KiloWash Laundry';
 
   return (
     `Halo ${customerName}! 👋\n` +
-    `Terima kasih telah mempercayakan cucian Anda kepada *KiloWash Laundry*. Pesanan Anda telah kami terima dan sedang kami proses.\n\n` +
+    `Terima kasih telah mempercayakan cucian Anda kepada *${branchName}*. Pesanan Anda telah kami terima dan sedang kami proses.\n\n` +
     `📋 *Detail Pesanan:*\n` +
     `- Kode Order: *${orderCode}*\n` +
     `- Layanan: ${serviceName}\n` +
@@ -102,6 +103,9 @@ const buildReadyMessage = (order) => {
   const weight = order.weight_kg;
   const totalPrice = formatRp(order.total_price);
 
+  const branchName = order.Branch ? order.Branch.name : 'KiloWash Laundry';
+  const branchAddress = order.Branch ? `📍 *Lokasi Pengambilan:*\n${branchName}\n${order.Branch.address || ''}` : `📍 *KiloWash Laundry*`;
+
   return (
     `Halo ${customerName}! 🧺\n` +
     `Cucian Anda dengan kode order *${orderCode}* sudah selesai dan siap diambil.\n\n` +
@@ -110,7 +114,7 @@ const buildReadyMessage = (order) => {
     `- Berat: ${weight} Kg\n` +
     `- Total Tagihan: *${totalPrice}*\n\n` +
     `Kami menerima pembayaran dalam bentuk Tunai, Transfer Bank, dan QRIS.\n\n` +
-    `📍 *KiloWash Laundry*\n` +
+    `${branchAddress}\n` +
     `⏰ Jam operasional: 07.00 – 21.00\n\n` +
     `Terima kasih telah menggunakan layanan kami! ⭐`
   );

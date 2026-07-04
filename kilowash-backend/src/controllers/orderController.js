@@ -233,7 +233,7 @@ exports.updateOrderStatus = async (req, res) => {
   try {
     const { status } = req.body;
     const order = await Order.findByPk(req.params.id, {
-      include: [{ model: Customer }, { model: ServiceType }]
+      include: [{ model: Customer }, { model: ServiceType }, { model: Branch }]
     });
     if (!order) return res.status(404).json({ success: false, message: 'Order tidak ditemukan' });
 

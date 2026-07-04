@@ -12,18 +12,21 @@ class Sidebar extends HTMLElement {
 
     const active = (page) => currentPage === page ? 'active' : '';
 
-    const isOwner       = user.role === 'owner';
-    const isAdmin       = user.role === 'admin';
-    const isBranchAdmin = user.role === 'branch_admin';
-    const isKasir       = user.role === 'kasir';
-    const isPetugas     = user.role === 'petugas';
+    // Normalize role to lowercase to handle any casing inconsistencies
+    const role = (user.role || '').toLowerCase().replace(' ', '_');
+
+    const isOwner       = role === 'owner';
+    const isAdmin       = role === 'admin';
+    const isBranchAdmin = role === 'branch_admin';
+    const isKasir       = role === 'kasir';
+    const isPetugas     = role === 'petugas';
 
     const canSeeReports     = isOwner || isAdmin || isBranchAdmin;
     const canSeeMaster      = isOwner || isAdmin;
     const canSeeBranches    = isOwner;
-    const canSeeRatings     = isOwner || isAdmin || isBranchAdmin;
+    const canSeeRatings     = isOwner || isAdmin || isBranchAdmin || isKasir;
     const canSeePayments    = isAdmin || isKasir;
-    const canSeeQueue       = isAdmin || isPetugas || isBranchAdmin;
+    const canSeeQueue       = isAdmin || isPetugas || isBranchAdmin || isKasir;
 
     this.innerHTML = `
       <div class="sidebar-overlay"></div>

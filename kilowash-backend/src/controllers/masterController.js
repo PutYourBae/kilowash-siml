@@ -1,4 +1,4 @@
-const { ServiceType, User, Branch, sequelize } = require('../models');
+const { ServiceType, User, Branch, Customer, sequelize } = require('../models');
 const bcrypt = require('bcryptjs');
 
 // -- SERVICES --
@@ -62,6 +62,34 @@ exports.updateUser = async (req, res) => {
     if (password) updateData.password = await bcrypt.hash(password, 10);
     await user.update(updateData);
     res.json({ success: true, user: { id: user.id, name: user.name, role: user.role, is_active: user.is_active, branch_id: user.branch_id } });
+  } catch (error) { res.status(500).json({ success: false, message: 'Server error' }); }
+};
+
+// -- CUSTOMERS --
+exports.getCustomers = async (req, res) => {
+  try {
+    const customers = await Customer.findAll({ order: [['id', 'ASC']] });
+    res.json({ success: true, customers });
+  } catch (error) { res.status(500).json({ success: false, message: 'Server error' }); }
+};
+
+exports.createCustomer = async (req, res) => {
+  try {
+    const { name, phone } = req.body;
+    const existing = await Customer.findOne({ where: { phone } });
+    if (existing) return res.status(400).json({ success: false, message: 'Nomor WhatsApp sudah terdaftar' });
+    const customer = await Customer.create({ name, phone });
+    res.status(201).json({ success: true, customer });
+  } catch (error) { res.status(500).json({ success: false, message: 'Server error' }); }
+};
+
+exports.updateCustomer = async (req, res) => {
+  try {
+    const customer = await Customer.findByPk(req.params.id);
+    if (!customer) return res.status(404).json({ success: false, message: 'Pelanggan tidak ditemukan' });
+    const { name, phone } = req.body;
+    await customer.update({ name, phone });
+    res.json({ success: true, customer });
   } catch (error) { res.status(500).json({ success: false, message: 'Server error' }); }
 };
 

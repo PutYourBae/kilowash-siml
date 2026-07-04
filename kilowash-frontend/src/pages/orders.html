@@ -93,6 +93,13 @@
       </div>
       <div class="modal-body">
         <input type="hidden" id="editOrderId">
+        <div class="form-group" style="margin-bottom:16px;">
+          <label class="form-label">Cari Data Member (Autofill)</label>
+          <select id="memberSelect" class="form-control">
+            <option value="">-- Pelanggan Baru / Non-Member --</option>
+          </select>
+          <div class="fs-12 text-muted mt-4">Pilih member untuk mengisi otomatis nama & no WA.</div>
+        </div>
         <div class="form-row">
           <div class="form-group">
             <label class="form-label">Nama Pelanggan *</label>
@@ -113,6 +120,10 @@
             <input type="number" id="weightKg" class="form-control" step="0.1" min="1" placeholder="0.0" required>
             <div class="fs-12 text-muted mt-4" id="minOrderHint" style="display:none;"></div>
           </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Gunakan Poin Diskon (Opsional)</label>
+          <input type="number" id="pointsToRedeem" class="form-control" min="0" placeholder="Jumlah poin (1 Poin = Rp100)">
         </div>
         <div class="form-group">
           <label class="form-label">Estimasi Harga</label>
@@ -178,6 +189,7 @@
     let currentPage = 1;
     let totalPages = 1;
     let user;
+    let allCustomers = [];
 
     document.addEventListener('DOMContentLoaded', async () => {
       user = requireAuth(['owner', 'admin', 'kasir']);
@@ -185,6 +197,7 @@
 
       await loadServices();
       await loadOrders();
+      await loadCustomersForSelect();
 
       if (user.role === 'owner') {
         const { ok: bOk, data: bData } = await api('/branches');
@@ -221,11 +234,23 @@
         document.getElementById('orderModalTitle').textContent = 'Buat Order Baru';
         document.getElementById('editOrderId').value = '';
         document.getElementById('saveOrderBtn').textContent = 'Simpan Order';
-        ['custName','custPhone','notes'].forEach(id => document.getElementById(id).value = '');
+        ['memberSelect','custName','custPhone','notes'].forEach(id => document.getElementById(id).value = '');
         document.getElementById('weightKg').value = '';
         document.getElementById('pointsToRedeem').value = '';
         document.getElementById('pricePreview').textContent = '—';
         openModal('orderModal');
+      });
+
+      // Member autofill
+      document.getElementById('memberSelect').addEventListener('change', (e) => {
+        const c = allCustomers.find(x => x.id == e.target.value);
+        if (c) {
+          document.getElementById('custName').value = c.name;
+          document.getElementById('custPhone').value = c.phone;
+        } else {
+          document.getElementById('custName').value = '';
+          document.getElementById('custPhone').value = '';
+        }
       });
 
       // Price preview
@@ -294,6 +319,16 @@
 
       const total = price * qty;
       document.getElementById('pricePreview').textContent = total > 0 ? formatRp(total) : '—';
+    }
+
+    async function loadCustomersForSelect() {
+      const { ok, data } = await api('/master/customers');
+      if (ok && data.success) {
+        allCustomers = data.customers;
+        const sel = document.getElementById('memberSelect');
+        sel.innerHTML = '<option value="">-- Pelanggan Baru / Non-Member --</option>' + 
+          allCustomers.map(c => `<option value="${c.id}">${c.name} (${c.phone}) - Poin: ${c.total_points}</option>`).join('');
+      }
     }
 
     async function loadOrders() {

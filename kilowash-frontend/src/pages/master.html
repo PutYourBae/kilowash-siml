@@ -16,7 +16,7 @@
       <div class="topbar">
         <div class="topbar-title">
           <h1>Data Master</h1>
-          <p>Kelola layanan dan akun karyawan</p>
+          <p>Kelola layanan, cabang, karyawan, dan pelanggan (member)</p>
         </div>
       </div>
 
@@ -24,7 +24,9 @@
         <!-- Tabs -->
         <div style="display:flex;gap:4px;background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-md);padding:4px;margin-bottom:20px;width:fit-content;">
           <button class="btn tab-btn active" data-tab="services" onclick="switchTab('services')">🧺 Layanan</button>
+          <button class="btn tab-btn" data-tab="branches" onclick="switchTab('branches')" id="tabBtnBranches">🏠 Cabang</button>
           <button class="btn tab-btn" data-tab="users" onclick="switchTab('users')">👥 Karyawan</button>
+          <button class="btn tab-btn" data-tab="members" onclick="switchTab('members')">💎 Member</button>
         </div>
 
         <!-- Tab: Layanan -->
@@ -54,6 +56,38 @@
               <table class="data-table">
                 <thead><tr><th>Nama</th><th>Email</th><th>Role</th><th>Cabang</th><th>Status</th><th>Aksi</th></tr></thead>
                 <tbody id="userTable"><tr><td colspan="5" style="text-align:center;padding:30px;">Memuat...</td></tr></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab: Cabang -->
+        <div id="tab-branches" style="display:none;">
+          <div class="card">
+            <div class="card-header">
+              <h3>Daftar Cabang</h3>
+              <button class="btn btn-primary btn-sm" id="btnAddBranch">+ Tambah Cabang</button>
+            </div>
+            <div class="table-wrapper">
+              <table class="data-table">
+                <thead><tr><th>Nama Cabang</th><th>Alamat</th><th>Telepon</th><th>Status</th><th>Aksi</th></tr></thead>
+                <tbody id="branchTable"><tr><td colspan="5" style="text-align:center;padding:30px;">Memuat...</td></tr></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab: Member -->
+        <div id="tab-members" style="display:none;">
+          <div class="card">
+            <div class="card-header">
+              <h3>Daftar Pelanggan (Member)</h3>
+              <button class="btn btn-primary btn-sm" id="btnAddMember">+ Tambah Member</button>
+            </div>
+            <div class="table-wrapper">
+              <table class="data-table">
+                <thead><tr><th>Nama</th><th>WhatsApp</th><th>Poin Aktif</th><th>Aksi</th></tr></thead>
+                <tbody id="memberTable"><tr><td colspan="4" style="text-align:center;padding:30px;">Memuat...</td></tr></tbody>
               </table>
             </div>
           </div>
@@ -168,11 +202,73 @@
     </div>
   </div>
 
+  <!-- Modal: Branch -->
+  <div class="modal-overlay" id="branchModal">
+    <div class="modal" style="max-width:460px;">
+      <div class="modal-header">
+        <h3 id="branchModalTitle">Tambah Cabang</h3>
+        <button class="modal-close" onclick="closeModal('branchModal')">✕</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="bId">
+        <div class="form-group">
+          <label class="form-label">Nama Cabang *</label>
+          <input type="text" id="bName" class="form-control">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Telepon</label>
+          <input type="text" id="bPhone" class="form-control">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Alamat</label>
+          <textarea id="bAddress" class="form-control" rows="2"></textarea>
+        </div>
+        <div class="form-group" id="bActiveGroup" style="display:none;">
+          <label class="form-label">Status</label>
+          <select id="bActive" class="form-control">
+            <option value="true">Aktif</option>
+            <option value="false">Non-Aktif</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('branchModal')">Batal</button>
+        <button class="btn btn-primary" onclick="saveBranch()">Simpan</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Member -->
+  <div class="modal-overlay" id="memberModal">
+    <div class="modal" style="max-width:400px;">
+      <div class="modal-header">
+        <h3 id="memberModalTitle">Tambah Member</h3>
+        <button class="modal-close" onclick="closeModal('memberModal')">✕</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="mId">
+        <div class="form-group">
+          <label class="form-label">Nama Pelanggan *</label>
+          <input type="text" id="mName" class="form-control" placeholder="Nama lengkap">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Nomor WhatsApp *</label>
+          <input type="text" id="mPhone" class="form-control" placeholder="08xxxxxxxxxx">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('memberModal')">Batal</button>
+        <button class="btn btn-primary" onclick="saveMember()">Simpan</button>
+      </div>
+    </div>
+  </div>
+
   <script src="../js/config.js"></script>
   <script src="../js/app.js"></script>
   <script>
+    let currentUser;
     document.addEventListener('DOMContentLoaded', async () => {
-      requireAuth(['owner']);
+      currentUser = requireAuth(['owner', 'admin']);
       
       const { ok: bOk, data: bData } = await api('/branches');
       if (bOk && bData.success) {
@@ -180,15 +276,26 @@
         if (uB) uB.innerHTML = '<option value="">Pusat (Semua Cabang)</option>' + bData.data.map(b => `<option value="${b.id}">${b.name}</option>`).join('');
       }
 
+      if (currentUser.role !== 'owner') {
+        document.getElementById('tabBtnBranches').style.display = 'none';
+      }
+
       loadServices();
       loadUsers();
+      if (currentUser.role === 'owner') loadBranches();
+      loadMembers();
+
       document.getElementById('btnAddService').addEventListener('click', () => openServiceModal());
       document.getElementById('btnAddUser').addEventListener('click', () => openUserModal());
+      document.getElementById('btnAddBranch').addEventListener('click', () => openBranchModal());
+      document.getElementById('btnAddMember').addEventListener('click', () => openMemberModal());
     });
 
     function switchTab(tab) {
       document.getElementById('tab-services').style.display = tab === 'services' ? 'block' : 'none';
       document.getElementById('tab-users').style.display    = tab === 'users'    ? 'block' : 'none';
+      document.getElementById('tab-branches').style.display = tab === 'branches' ? 'block' : 'none';
+      document.getElementById('tab-members').style.display  = tab === 'members'  ? 'block' : 'none';
       document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('btn-primary', b.dataset.tab === tab));
       document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
     }
@@ -222,6 +329,35 @@
           <td class="fs-13 text-muted">${u.Branch?.name || 'Pusat'}</td>
           <td><span class="badge ${u.is_active ? 'badge-success' : 'badge-diambil'}">${u.is_active ? 'Aktif' : 'Non-Aktif'}</span></td>
           <td><button class="btn btn-secondary btn-sm" onclick='openUserModal(${JSON.stringify(u)})'>Edit</button></td>
+        </tr>
+      `).join('');
+    }
+
+    async function loadBranches() {
+      const { ok, data } = await api('/branches');
+      const tbody = document.getElementById('branchTable');
+      if (!ok) { tbody.innerHTML = '<tr><td colspan="5">Gagal memuat</td></tr>'; return; }
+      tbody.innerHTML = data.data.map(b => `
+        <tr>
+          <td class="fw-600">${b.name}</td>
+          <td class="fs-13 text-secondary">${b.address || '-'}</td>
+          <td class="fs-13">${b.phone || '-'}</td>
+          <td><span class="badge ${b.is_active ? 'badge-success' : 'badge-diambil'}">${b.is_active ? 'Aktif' : 'Non-Aktif'}</span></td>
+          <td><button class="btn btn-secondary btn-sm" onclick='openBranchModal(${JSON.stringify(b).replace(/'/g, "\\'")})'>Edit</button></td>
+        </tr>
+      `).join('');
+    }
+
+    async function loadMembers() {
+      const { ok, data } = await api('/master/customers');
+      const tbody = document.getElementById('memberTable');
+      if (!ok) { tbody.innerHTML = '<tr><td colspan="4">Gagal memuat</td></tr>'; return; }
+      tbody.innerHTML = data.customers.map(m => `
+        <tr>
+          <td class="fw-600">${m.name}</td>
+          <td class="fs-13 text-secondary">${m.phone}</td>
+          <td><span class="badge badge-primary">${m.total_points || 0} Poin</span></td>
+          <td><button class="btn btn-secondary btn-sm" onclick='openMemberModal(${JSON.stringify(m).replace(/'/g, "\\'")})'>Edit</button></td>
         </tr>
       `).join('');
     }
@@ -293,6 +429,53 @@
 
       const { ok, data } = id ? await api(`/master/users/${id}`, 'PUT', payload) : await api('/master/users', 'POST', { ...payload, password: pw });
       if (ok) { toast('Karyawan berhasil disimpan!', 'success'); closeModal('userModal'); loadUsers(); }
+      else toast(data.message || 'Gagal menyimpan', 'error');
+    }
+
+    function openBranchModal(b = null) {
+      document.getElementById('branchModalTitle').textContent = b ? 'Edit Cabang' : 'Tambah Cabang';
+      document.getElementById('bId').value      = b?.id || '';
+      document.getElementById('bName').value    = b?.name || '';
+      document.getElementById('bPhone').value   = b?.phone || '';
+      document.getElementById('bAddress').value = b?.address || '';
+      document.getElementById('bActive').value  = b ? String(b.is_active) : 'true';
+      document.getElementById('bActiveGroup').style.display = b ? 'block' : 'none';
+      openModal('branchModal');
+    }
+
+    async function saveBranch() {
+      const id = document.getElementById('bId').value;
+      const payload = {
+        name: document.getElementById('bName').value.trim(),
+        phone: document.getElementById('bPhone').value.trim(),
+        address: document.getElementById('bAddress').value.trim(),
+        is_active: document.getElementById('bActive').value === 'true'
+      };
+      if (!payload.name) { toast('Nama cabang wajib diisi!', 'warning'); return; }
+
+      const { ok, data } = id ? await api(`/branches/${id}`, 'PUT', payload) : await api('/branches', 'POST', payload);
+      if (ok) { toast('Cabang berhasil disimpan!', 'success'); closeModal('branchModal'); loadBranches(); }
+      else toast(data.message || 'Gagal menyimpan', 'error');
+    }
+
+    function openMemberModal(m = null) {
+      document.getElementById('memberModalTitle').textContent = m ? 'Edit Member' : 'Tambah Member';
+      document.getElementById('mId').value    = m?.id || '';
+      document.getElementById('mName').value  = m?.name || '';
+      document.getElementById('mPhone').value = m?.phone || '';
+      openModal('memberModal');
+    }
+
+    async function saveMember() {
+      const id = document.getElementById('mId').value;
+      const payload = {
+        name: document.getElementById('mName').value.trim(),
+        phone: document.getElementById('mPhone').value.trim()
+      };
+      if (!payload.name || !payload.phone) { toast('Nama & WA wajib diisi!', 'warning'); return; }
+
+      const { ok, data } = id ? await api(`/master/customers/${id}`, 'PUT', payload) : await api('/master/customers', 'POST', payload);
+      if (ok) { toast('Member berhasil disimpan!', 'success'); closeModal('memberModal'); loadMembers(); }
       else toast(data.message || 'Gagal menyimpan', 'error');
     }
   </script>

@@ -12,6 +12,10 @@ router.get('/users', authMiddleware, roleMiddleware(['owner']), masterController
 router.post('/users', authMiddleware, roleMiddleware(['owner']), masterController.createUser);
 router.put('/users/:id', authMiddleware, roleMiddleware(['owner']), masterController.updateUser);
 
+router.get('/customers', authMiddleware, masterController.getCustomers);
+router.post('/customers', authMiddleware, masterController.createCustomer);
+router.put('/customers/:id', authMiddleware, masterController.updateCustomer);
+
 router.get('/outlet', authMiddleware, roleMiddleware(['owner']), masterController.getOutletInfo);
 
 module.exports = router;

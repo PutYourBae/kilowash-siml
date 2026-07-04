@@ -8,7 +8,6 @@ const Payment = require('./Payment');
 const NotificationLog = require('./NotificationLog');
 // v2 — new models
 const Branch = require('./Branch');
-const LoyaltyPoint = require('./LoyaltyPoint');
 const Rating = require('./Rating');
 
 // ─── v1 Associations ────────────────────────────────────────────
@@ -55,14 +54,6 @@ Order.belongsTo(Branch, { foreignKey: 'branch_id' });
 Branch.hasMany(User, { foreignKey: 'branch_id' });
 User.belongsTo(Branch, { foreignKey: 'branch_id' });
 
-// Customer <-> LoyaltyPoint
-Customer.hasMany(LoyaltyPoint, { foreignKey: 'customer_id' });
-LoyaltyPoint.belongsTo(Customer, { foreignKey: 'customer_id' });
-
-// Order <-> LoyaltyPoint
-Order.hasMany(LoyaltyPoint, { foreignKey: 'order_id' });
-LoyaltyPoint.belongsTo(Order, { foreignKey: 'order_id' });
-
 // Order <-> Rating (one-to-one, unique per order — FR-R2)
 Order.hasOne(Rating, { foreignKey: 'order_id' });
 Rating.belongsTo(Order, { foreignKey: 'order_id' });
@@ -86,6 +77,5 @@ module.exports = {
   NotificationLog,
   // v2
   Branch,
-  LoyaltyPoint,
   Rating
 };

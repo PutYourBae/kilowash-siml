@@ -86,7 +86,7 @@ exports.getOrders = async (req, res) => {
 
 exports.createOrder = async (req, res) => {
   try {
-    const { customer_name, customer_phone, service_type_id, weight_kg, notes, branch_id, points_to_redeem } = req.body;
+    const { customer_name, customer_phone, service_type_id, weight_kg, notes, branch_id } = req.body;
 
     // Validasi layanan
     const service = await ServiceType.findByPk(service_type_id);
@@ -241,22 +241,14 @@ exports.updateOrderStatus = async (req, res) => {
     await order.update({ status });
     await OrderStatusLog.create({ order_id: order.id, old_status: oldStatus, new_status: status, changed_by: req.user.id });
 
-    // Trigger notifikasi WA "selesai" & award loyalty points saat status = selesai
+    // Trigger notifikasi WA "selesai" saat status = selesai
     if (status === 'selesai') {
       setImmediate(async () => {
-        // Kirim WA ready notification
         try {
           const waService = require('../services/whatsappService');
           await waService.sendOrderReadyNotification(order);
         } catch (waErr) {
           console.error('[WA] Gagal kirim notifikasi selesai:', waErr.message);
-        }
-        // FR-M1: Award loyalty points
-        try {
-          const loyaltyController = require('./loyaltyController');
-          await loyaltyController.awardPoints(order);
-        } catch (loyaltyErr) {
-          console.error('[Loyalty] Gagal award poin:', loyaltyErr.message);
         }
       });
     }

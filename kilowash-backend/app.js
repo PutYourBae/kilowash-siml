@@ -7,7 +7,7 @@ const cors = require('cors');
 const rateLimit = require('express-rate-limit');
 const sequelize = require('./src/config/database');
 
-// Import models agar terdaftar (termasuk v2: Branch, LoyaltyPoint, Rating)
+// Import models agar terdaftar (termasuk v2: Branch, Rating)
 require('./src/models/index');
 
 const app = express();
@@ -49,7 +49,6 @@ const reportRoutes       = require('./src/routes/reports');
 const notificationRoutes = require('./src/routes/notifications');
 // v2
 const branchRoutes       = require('./src/routes/branches');
-const loyaltyRoutes      = require('./src/routes/loyalty');
 const ratingRoutes       = require('./src/routes/ratings');
 
 // ─── Setup Routes ────────────────────────────────────────────────
@@ -63,7 +62,6 @@ app.use('/api/reports',       reportRoutes);
 app.use('/api/notifications', notificationRoutes);
 // v2
 app.use('/api/branches',      branchRoutes);
-app.use('/api/loyalty',       loyaltyRoutes);
 app.use('/api/ratings',       ratingRoutes);
 
 app.get('/', (req, res) => {

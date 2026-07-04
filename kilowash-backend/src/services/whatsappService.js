@@ -76,7 +76,7 @@ const buildRegisteredMessage = (order) => {
   const weight = order.weight_kg;
   const totalPrice = formatRp(order.total_price);
   const estDate = formatDate(order.est_finish_date);
-  const trackingLink = `${TRACKING_BASE_URL}/src/pages/track.html?code=${orderCode}`;
+  const trackingLink = `${TRACKING_BASE_URL}/src/pages/tracking.html?code=${orderCode}`;
 
   return (
     `Halo ${customerName}! 👋\n` +

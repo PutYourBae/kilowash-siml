@@ -75,6 +75,7 @@
   <script src="../js/app.js"></script>
   <script>
     let isUpdating = false;
+    const statusLabel = { diterima: 'Diterima', proses: 'Proses', selesai: 'Selesai', diambil: 'Diambil', dibatalkan: 'Dibatalkan' };
 
     document.addEventListener('DOMContentLoaded', () => {
       requireAuth(['owner', 'admin', 'branch_admin', 'petugas']);

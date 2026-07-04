@@ -4,116 +4,155 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Detail Order | KiloWash</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap">
   <link rel="stylesheet" href="../styles/app.css">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%A7%BA%3C/text%3E%3C/svg%3E">
+  <meta name="view-transition" content="same-origin">
 </head>
-<body class="app-layout">
-  <!-- Sidebar akan di-inject oleh JS -->
-  <aside class="sidebar" id="sidebar"></aside>
-
-  <main class="main-content">
-    <div class="topbar">
-      <div class="page-title">
-        <h1 class="fs-20 fw-700 m-0">Detail Order</h1>
-      </div>
-      <div class="user-profile">
-        <div class="avatar" id="userAvatar">A</div>
-        <div class="user-info">
-          <div class="fw-600 fs-14" id="userName">Admin</div>
-          <div class="fs-12 text-muted" id="userRole">Administrator</div>
+<body>
+  <div class="app-layout">
+    <app-sidebar></app-sidebar>
+    <div class="main-content">
+      <div class="topbar">
+        <div class="topbar-title">
+          <h1>Detail Order</h1>
+          <p>Informasi lengkap pesanan laundry</p>
+        </div>
+        <div class="topbar-actions">
+          <button class="btn btn-secondary" onclick="window.history.back()">← Kembali</button>
         </div>
       </div>
-    </div>
 
-    <div class="content">
-      <div class="card" style="max-width: 600px; margin: 0 auto; padding: 24px;">
-        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom: 24px;">
-          <div>
-            <h2 class="fs-18 fw-700 m-0" id="detailOrderCode" style="color:var(--brand-primary)">Memuat...</h2>
-            <div class="fs-13 text-muted mt-2" id="detailDate"></div>
+      <div class="page-body">
+        <div class="card" style="max-width:640px;">
+          <div class="card-header">
+            <h3 id="detailOrderCode" style="color:var(--brand-primary);">Memuat...</h3>
+            <span class="badge" id="detailStatus"></span>
           </div>
-          <span class="badge" id="detailStatus" style="font-size: 14px; padding: 6px 12px;"></span>
-        </div>
-
-        <div style="background:var(--bg-light); border-radius: 8px; padding: 16px; margin-bottom: 20px;">
-          <h3 class="fs-14 fw-600 mb-3 text-muted">INFO PELANGGAN</h3>
-          <div class="fw-600 fs-16 mb-1" id="detailCustName">-</div>
-          <div class="fs-13 text-muted mb-2" id="detailCustPhone">-</div>
-        </div>
-
-        <div style="background:var(--bg-light); border-radius: 8px; padding: 16px; margin-bottom: 24px;">
-          <h3 class="fs-14 fw-600 mb-3 text-muted">DETAIL LAYANAN</h3>
-          <div style="display:flex; justify-content:space-between; margin-bottom: 8px;">
-            <span class="fs-14 fw-500">Layanan</span>
-            <span class="fs-14 fw-600" id="detailServiceName">-</span>
+          <div class="card-body" id="detailBody" style="padding:24px;">
+            <div style="text-align:center;padding:40px;color:var(--color-text-muted);">Memuat data order...</div>
           </div>
-          <div style="display:flex; justify-content:space-between; margin-bottom: 8px;">
-            <span class="fs-14 fw-500">Jumlah / Berat</span>
-            <span class="fs-14 fw-600" id="detailWeight">-</span>
-          </div>
-          <div style="display:flex; justify-content:space-between; margin-bottom: 8px;">
-            <span class="fs-14 fw-500">Estimasi Selesai</span>
-            <span class="fs-14 fw-600" id="detailEst">-</span>
-          </div>
-          <div style="display:flex; justify-content:space-between; padding-top: 12px; border-top: 1px dashed var(--border-color); margin-top: 12px;">
-            <span class="fs-16 fw-600">Total Harga</span>
-            <span class="fs-18 fw-700" style="color:var(--brand-primary)" id="detailTotal">-</span>
-          </div>
-        </div>
-
-        <div style="display:flex; gap: 12px;">
-          <button class="btn btn-secondary" style="flex:1" onclick="window.history.back()">Kembali</button>
-          <button class="btn btn-primary" style="flex:1" onclick="window.print()">🖨 Cetak Struk</button>
+          <div class="card-footer" style="display:flex;gap:10px;justify-content:flex-end;" id="detailFooter"></div>
         </div>
       </div>
     </div>
-  </main>
+  </div>
 
   <script src="../js/config.js"></script>
   <script src="../js/app.js"></script>
   <script>
+    const statusLabelMap = { diterima: 'Diterima', proses: 'Proses', selesai: 'Selesai', diambil: 'Diambil', dibatalkan: 'Dibatalkan' };
+
     document.addEventListener('DOMContentLoaded', async () => {
-      requireAuth(['owner', 'admin', 'kasir']);
-      setupSidebar();
-      
+      const user = requireAuth(['owner', 'admin', 'kasir', 'branch_admin']);
+      if (!user) return;
+
       const urlParams = new URLSearchParams(window.location.search);
       const code = urlParams.get('code');
-      
+
       if (!code) {
-        toast('Kode order tidak ditemukan', 'error');
+        document.getElementById('detailBody').innerHTML = '<div class="empty-state"><div class="empty-icon">⚠️</div><h4>Kode order tidak ditemukan di URL</h4></div>';
         return;
       }
-      
-      const { ok, data } = await api(`/orders?search=${code}`);
+
+      const { ok, data } = await api(`/orders?search=${encodeURIComponent(code)}`);
       if (!ok || !data.success || data.data.orders.length === 0) {
-        toast('Order tidak ditemukan', 'error');
+        document.getElementById('detailBody').innerHTML = '<div class="empty-state"><div class="empty-icon">🔍</div><h4>Order tidak ditemukan</h4><p>Pastikan kode order sudah benar.</p></div>';
         return;
       }
-      
+
       const order = data.data.orders[0];
-      
+
       document.getElementById('detailOrderCode').textContent = order.order_code;
-      document.getElementById('detailDate').textContent = new Date(order.created_at).toLocaleString('id-ID');
-      
       const badge = document.getElementById('detailStatus');
-      badge.textContent = order.status.toUpperCase();
+      badge.textContent = statusLabelMap[order.status] || order.status;
       badge.className = `badge badge-${order.status}`;
-      
-      document.getElementById('detailCustName').textContent = order.Customer?.name || '-';
-      document.getElementById('detailCustPhone').textContent = order.Customer?.phone || '-';
-      
-      document.getElementById('detailServiceName').textContent = order.ServiceType?.name || '-';
-      
+
       const unit = order.ServiceType?.unit === 'pcs' ? 'Pcs' : 'Kg';
-      document.getElementById('detailWeight').textContent = `${order.weight_kg} ${unit}`;
-      
-      const est = new Date(order.est_finish_date);
-      document.getElementById('detailEst').textContent = est.toLocaleDateString('id-ID');
-      
-      document.getElementById('detailTotal').textContent = formatRp(order.total_price);
+      const discount = parseFloat(order.discount_from_points) || 0;
+
+      document.getElementById('detailBody').innerHTML = `
+        <div class="highlight-box mb-16">
+          <div class="fs-12 text-muted mb-4">Dibuat pada</div>
+          <div class="fw-600">${formatDateTime(order.created_at)}</div>
+        </div>
+
+        <div class="form-row mb-16">
+          <div>
+            <div class="fs-12 text-muted mb-4">Pelanggan</div>
+            <div class="fw-600">${order.Customer?.name || '—'}</div>
+            <div class="fs-12 text-muted">${order.Customer?.phone || '—'}</div>
+          </div>
+          <div>
+            <div class="fs-12 text-muted mb-4">Cabang</div>
+            <div class="fw-600">${order.Branch?.name || 'Pusat'}</div>
+          </div>
+        </div>
+
+        <div style="background:var(--color-bg);border-radius:var(--radius-md);padding:16px 20px;margin-bottom:16px;">
+          <div class="fs-12 text-muted mb-8">Detail Layanan</div>
+          <div class="d-flex justify-between mb-8">
+            <span class="fs-14 fw-500">${order.ServiceType?.name || '—'}</span>
+            <span class="fs-14 fw-600">${order.weight_kg} ${unit}</span>
+          </div>
+          <div class="d-flex justify-between mb-8 fs-13">
+            <span class="text-muted">Harga Dasar</span>
+            <span>${formatRp(order.ServiceType?.price_per_kg * order.weight_kg || 0)}</span>
+          </div>
+          ${discount > 0 ? `<div class="d-flex justify-between mb-8 fs-13">
+            <span class="text-muted">Diskon Member (5%)</span>
+            <span style="color:var(--brand-primary)">- ${formatRp(discount)}</span>
+          </div>` : ''}
+          <div class="d-flex justify-between" style="border-top:1px dashed var(--color-border);padding-top:12px;margin-top:4px;">
+            <span class="fw-700">Total Harga</span>
+            <span class="fw-700 fs-16" style="color:var(--brand-primary);">${formatRp(order.total_price)}</span>
+          </div>
+        </div>
+
+        <div class="d-flex justify-between fs-13 mb-4">
+          <span class="text-muted">Estimasi Selesai</span>
+          <span class="fw-600">${order.est_finish_date ? formatDate(order.est_finish_date) : '—'}</span>
+        </div>
+
+        ${order.notes ? `<div class="form-group mt-16"><div class="fs-12 text-muted mb-4">Catatan</div><div class="fs-13" style="background:var(--color-bg);padding:10px 14px;border-radius:8px;">${order.notes}</div></div>` : ''}
+      `;
+
+      document.getElementById('detailFooter').innerHTML = `
+        <button class="btn btn-secondary btn-sm" onclick="printNota()">🖨 Cetak Nota</button>
+      `;
+
+      window._printOrder = order;
     });
+
+    function printNota() {
+      const o = window._printOrder;
+      if (!o) return;
+      const discount = parseFloat(o.discount_from_points) || 0;
+      const html = `
+        <style>body{font-family:monospace;padding:20px;max-width:300px;margin:auto}h2{text-align:center;margin-bottom:4px}p{margin:2px 0;font-size:13px}.dashed{border-top:1px dashed #000;margin:10px 0}.right{text-align:right}.bold{font-weight:bold}</style>
+        <h2>🧺 KiloWash</h2>
+        <p style="text-align:center;font-size:12px;">Nota Transaksi</p>
+        <div class="dashed"></div>
+        <p>Kode: <span class="bold">${o.order_code}</span></p>
+        <p>Tgl : ${formatDate(o.created_at)}</p>
+        <div class="dashed"></div>
+        <p>Pelanggan : ${o.Customer?.name}</p>
+        <p>No. WA    : ${o.Customer?.phone}</p>
+        <div class="dashed"></div>
+        <p>Layanan   : ${o.ServiceType?.name}</p>
+        <p>Berat     : ${o.weight_kg} Kg</p>
+        ${discount > 0 ? `<p>Diskon Member: - Rp ${discount.toLocaleString('id-ID')}</p>` : ''}
+        <div class="dashed"></div>
+        <p class="right bold">TOTAL: ${formatRp(o.total_price)}</p>
+        <div class="dashed"></div>
+        <p>Est. Selesai: ${formatDate(o.est_finish_date)}</p>
+        <p style="text-align:center;margin-top:16px;font-size:12px;">Terima kasih!</p>
+      `;
+      const w = window.open('', '_blank', 'width=400,height=600');
+      w.document.write(html);
+      w.document.close();
+      w.print();
+    }
   </script>
 </body>
 </html>

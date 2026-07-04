@@ -41,18 +41,17 @@ Merespons deteksi celah keamanan dari *Supabase Security Advisor*, Row Level Sec
 - **Hak Akses & Keamanan**: Jika seorang staf (misal Kasir) ditugaskan di Cabang A, sistem secara otomatis akan mengunci halaman **Daftar Order** dan **Laporan** hanya untuk data dari Cabang A. Sebaliknya, akun *Owner* (atau pusat) tetap dapat menggunakan *dropdown filter* untuk melihat dan mengelola data lintas cabang.
 - **Data Master Terpusat**: Seluruh manajemen konfigurasi, mulai dari Layanan, Cabang, Karyawan, hingga Pelanggan (Member) digabungkan dalam satu modul antarmuka yang rapi dan terpusat ("Data Master"), mengurangi redundansi halaman.
 
-### 3.2 Sistem Loyalitas (Membership & Points) & Autofill Order
-- **Deskripsi**: Pelanggan mendapatkan poin berdasarkan total transaksi (misalnya 1 Poin per Rp100). Poin tersebut dapat ditukar (redeem) menjadi diskon pada pesanan berikutnya.
-- **Klasifikasi**: Berdasarkan akumulasi poin, pelanggan diklasifikasikan ke dalam tier keanggotaan (Reguler, Silver, Gold).
-- **Order Autofill**: Kasir difasilitasi dengan *dropdown* pencarian cerdas pada form Order Baru. Jika pelanggan adalah member terdaftar, kasir hanya perlu memilih nama dari *dropdown*, dan sistem akan melakukan *autofill* (pengisian otomatis) pada kolom Nama dan Nomor WhatsApp. Ini mempercepat dan mengurangi kesalahan input (human error).
+### 3.2 Sistem Membership (Diskon Flat 5%) & Autofill Order
+- **Deskripsi**: Sistem poin sebelumnya disederhanakan menjadi sistem **Diskon Merata (Flat Discount)**. Pelanggan yang terdaftar sebagai Member secara otomatis akan langsung mendapatkan potongan harga sebesar 5% setiap kali bertransaksi di semua layanan KiloWash.
+- **Order Autofill & Harga Otomatis**: Kasir difasilitasi dengan *dropdown* pencarian cerdas pada form Order Baru. Jika pelanggan adalah member terdaftar, sistem akan melakukan *autofill* pada kolom Nama dan Nomor WhatsApp, serta secara *real-time* memotong estimasi harga di layar kasir sebesar 5%. Hal ini mempercepat pelayanan dan mengurangi *human error*.
 
 ### 3.3 Penilaian dan Umpan Balik (Rating System)
 - **Deskripsi**: Pelanggan yang pesanannya telah selesai atau diambil dapat memberikan penilaian bintang (1-5) dan komentar pada halaman pelacakan (*tracking*).
 - **Quality Control**: Ulasan yang berada di bawah atau sama dengan 2 bintang secara otomatis ditandai (flagged) agar dapat segera ditindaklanjuti (follow up) oleh Owner atau Admin.
 
-### 3.4 Notifikasi WhatsApp Lanjutan
-- Pada v1, notifikasi hanya dikirim saat pesanan selesai. Pada v2, pelanggan menerima notifikasi saat pesanan **dibuat (registered)**, lengkap dengan tautan pelacakan (*tracking link*) otomatis.
-- Notifikasi bersifat asinkron untuk menjaga kecepatan API respon.
+### 3.4 Notifikasi WhatsApp Cerdas & Asinkron
+- Pada v1, notifikasi hanya dikirim saat pesanan selesai. Pada v2, pelanggan menerima notifikasi asinkron saat pesanan **dibuat (registered)** lengkap dengan tautan pelacakan (*tracking link*), dan notifikasi saat pesanan **selesai**.
+- **Lokasi Dinamis (Dynamic Branch Routing)**: Bot WhatsApp telah ditingkatkan kemampuannya untuk mendeteksi secara otomatis cabang mana yang memproses cucian tersebut. Pada saat notifikasi siap diambil dikirimkan, pesan akan menampilkan secara presisi nama cabang dan lokasi (alamat) pengambilannya, mencegah kebingungan pelanggan pada operasional multi-cabang.
 
 ---
 

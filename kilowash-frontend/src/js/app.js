@@ -135,12 +135,15 @@ class AppSidebar extends HTMLElement {
         <div class="sidebar-section">
           <div class="sidebar-section-label">Laporan & Master</div>
           ${nav('reports.html', '📈', 'Laporan', ['owner', 'admin'])}
+          ${nav('ratings.html', '⭐', 'Feedback Pelanggan', ['owner', 'admin'])}
           ${nav('master.html', '⚙️', 'Data Master', ['owner'])}
+          ${nav('branches.html', '🏪', 'Manajemen Cabang', ['owner'])}
         </div>
         ` : user.role === 'admin' ? `
         <div class="sidebar-section">
           <div class="sidebar-section-label">Laporan & Master</div>
           ${nav('reports.html', '📈', 'Laporan', ['owner', 'admin'])}
+          ${nav('ratings.html', '⭐', 'Feedback Pelanggan', ['owner', 'admin'])}
         </div>
         ` : ''}
 

@@ -1,6 +1,6 @@
 class Sidebar extends HTMLElement {
   connectedCallback() {
-    const userStr = localStorage.getItem('user');
+    const userStr = localStorage.getItem('kw_user');
     if (!userStr) {
       window.location.href = 'login.html';
       return;
@@ -60,8 +60,8 @@ class Sidebar extends HTMLElement {
 
     // Logout
     document.getElementById('logoutBtn').addEventListener('click', () => {
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
+      localStorage.removeItem('kw_token');
+      localStorage.removeItem('kw_user');
       window.location.href = 'login.html';
     });
 

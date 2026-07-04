@@ -113,7 +113,8 @@
   <script src="../js/config.js"></script>
   <script src="../js/app.js"></script>
   <script>
-    const token = () => localStorage.getItem('token');
+    const user = requireAuth(['owner', 'admin', 'branch_admin', 'kasir']);
+    const token = () => localStorage.getItem('kw_token');
     let currentPage = 1;
     let totalPages  = 1;
     let searchTimer = null;

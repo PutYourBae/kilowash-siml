@@ -77,7 +77,7 @@
     let isUpdating = false;
 
     document.addEventListener('DOMContentLoaded', () => {
-      requireAuth(['owner', 'admin', 'petugas']);
+      requireAuth(['owner', 'admin', 'branch_admin', 'petugas']);
       loadKanban();
       document.getElementById('refreshBtn').addEventListener('click', loadKanban);
 

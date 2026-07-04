@@ -153,7 +153,7 @@
     let selectedTotal = 0;
 
     document.addEventListener('DOMContentLoaded', () => {
-      requireAuth(['admin', 'kasir', 'owner']);
+      requireAuth(['admin', 'branch_admin', 'kasir', 'owner']);
       loadOrders();
 
       document.getElementById('searchInput').addEventListener('input', debounce(filterOrders, 300));

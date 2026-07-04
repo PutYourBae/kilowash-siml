@@ -188,7 +188,7 @@
     let allCustomers = [];
 
     document.addEventListener('DOMContentLoaded', async () => {
-      user = requireAuth(['owner', 'admin', 'kasir']);
+      user = requireAuth(['owner', 'admin', 'branch_admin', 'kasir']);
       if (!user) return;
 
       await loadServices();

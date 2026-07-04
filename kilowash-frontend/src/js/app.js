@@ -66,8 +66,7 @@ const getUser = () => {
 
 // Redirect ke halaman pertama sesuai role
 const getHomePageForRole = (role) => {
-  if (role === 'owner') return 'dashboard.html';
-  if (role === 'admin') return 'dashboard.html';
+  if (['owner', 'admin', 'branch_admin'].includes(role)) return 'dashboard.html';
   if (role === 'kasir') return 'payments.html';
   if (role === 'petugas') return 'queue.html';
   return 'login.html';
@@ -125,25 +124,19 @@ class AppSidebar extends HTMLElement {
 
         <div class="sidebar-section">
           <div class="sidebar-section-label">Menu Utama</div>
-          ${nav('dashboard.html', '📊', 'Dashboard', ['owner', 'admin'])}
-          ${nav('orders.html', '📋', 'Daftar Order', ['owner', 'admin', 'kasir'])}
-          ${nav('queue.html', '🔄', 'Antrian Laundry', ['owner', 'admin', 'petugas'])}
-          ${nav('payments.html', '💳', 'Kasir & Pembayaran', ['owner', 'admin', 'kasir'])}
+          ${nav('dashboard.html', '📊', 'Dashboard', ['owner', 'admin', 'branch_admin'])}
+          ${nav('orders.html', '📋', 'Daftar Order', ['owner', 'admin', 'branch_admin', 'kasir'])}
+          ${nav('queue.html', '🔄', 'Antrian Laundry', ['owner', 'admin', 'branch_admin', 'kasir', 'petugas'])}
+          ${nav('payments.html', '💳', 'Kasir & Pembayaran', ['owner', 'admin', 'branch_admin', 'kasir'])}
         </div>
 
-        ${user.role === 'owner' ? `
+        ${['owner', 'admin', 'branch_admin', 'kasir'].includes(user.role) ? `
         <div class="sidebar-section">
           <div class="sidebar-section-label">Laporan & Master</div>
-          ${nav('reports.html', '📈', 'Laporan', ['owner', 'admin'])}
-          ${nav('ratings.html', '⭐', 'Feedback Pelanggan', ['owner', 'admin'])}
-          ${nav('master.html', '⚙️', 'Data Master', ['owner'])}
+          ${nav('reports.html', '📈', 'Laporan', ['owner', 'admin', 'branch_admin'])}
+          ${nav('ratings.html', '⭐', 'Feedback Pelanggan', ['owner', 'admin', 'branch_admin', 'kasir'])}
+          ${nav('master.html', '⚙️', 'Data Master', ['owner', 'admin'])}
           ${nav('branches.html', '🏪', 'Manajemen Cabang', ['owner'])}
-        </div>
-        ` : user.role === 'admin' ? `
-        <div class="sidebar-section">
-          <div class="sidebar-section-label">Laporan & Master</div>
-          ${nav('reports.html', '📈', 'Laporan', ['owner', 'admin'])}
-          ${nav('ratings.html', '⭐', 'Feedback Pelanggan', ['owner', 'admin'])}
         </div>
         ` : ''}
 

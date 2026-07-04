@@ -112,23 +112,14 @@ exports.createOrder = async (req, res) => {
     // Find or create customer
     const [customer] = await Customer.findOrCreate({
       where: { phone: customer_phone },
-      defaults: { name: customer_name }
+      defaults: { name: customer_name, is_member: false }
     });
 
-    // FR-M2: Hitung diskon dari poin jika ada
-    let discount_from_points = 0;
+    // Hitung diskon 5% jika pelanggan adalah member
+    let discount_from_points = 0; // Tetap gunakan variabel ini agar DB tidak perlu di-migrate
     let points_redeemed = 0;
-    if (points_to_redeem && parseInt(points_to_redeem, 10) > 0) {
-      const loyaltyController = require('./loyaltyController');
-      const pointsVal = parseInt(points_to_redeem, 10);
-      if (customer.total_points < pointsVal) {
-        return res.status(400).json({
-          success: false,
-          message: `Poin tidak cukup. Poin tersedia: ${customer.total_points}`
-        });
-      }
-      discount_from_points = loyaltyController.pointsToRupiah(pointsVal);
-      points_redeemed = pointsVal;
+    if (customer.is_member) {
+      discount_from_points = base_price * 0.05;
     }
 
     const total_price = Math.max(0, base_price - discount_from_points);
@@ -150,16 +141,6 @@ exports.createOrder = async (req, res) => {
     });
 
     await OrderStatusLog.create({ order_id: order.id, new_status: 'diterima', changed_by: req.user.id });
-
-    // FR-M2: Kurangi poin customer jika ada penukaran
-    if (points_redeemed > 0) {
-      const loyaltyController = require('./loyaltyController');
-      try {
-        await loyaltyController.redeemPoints(customer.id, points_redeemed, order.id);
-      } catch (loyaltyErr) {
-        console.error('[Loyalty] Gagal redeem poin:', loyaltyErr.message);
-      }
-    }
 
     const fullOrder = await Order.findByPk(order.id, {
       include: [{ model: Customer }, { model: ServiceType }, { model: Branch }]

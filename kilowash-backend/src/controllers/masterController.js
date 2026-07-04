@@ -68,7 +68,7 @@ exports.updateUser = async (req, res) => {
 // -- CUSTOMERS --
 exports.getCustomers = async (req, res) => {
   try {
-    const customers = await Customer.findAll({ order: [['id', 'ASC']] });
+    const customers = await Customer.findAll({ where: { is_member: true }, order: [['id', 'ASC']] });
     res.json({ success: true, customers });
   } catch (error) { res.status(500).json({ success: false, message: 'Server error' }); }
 };
@@ -77,8 +77,12 @@ exports.createCustomer = async (req, res) => {
   try {
     const { name, phone } = req.body;
     const existing = await Customer.findOne({ where: { phone } });
-    if (existing) return res.status(400).json({ success: false, message: 'Nomor WhatsApp sudah terdaftar' });
-    const customer = await Customer.create({ name, phone });
+    if (existing) {
+      if (existing.is_member) return res.status(400).json({ success: false, message: 'Nomor WhatsApp sudah terdaftar sebagai Member' });
+      await existing.update({ name, is_member: true });
+      return res.status(201).json({ success: true, customer: existing });
+    }
+    const customer = await Customer.create({ name, phone, is_member: true });
     res.status(201).json({ success: true, customer });
   } catch (error) { res.status(500).json({ success: false, message: 'Server error' }); }
 };

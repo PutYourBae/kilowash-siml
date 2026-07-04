@@ -86,7 +86,7 @@
             </div>
             <div class="table-wrapper">
               <table class="data-table">
-                <thead><tr><th>Nama</th><th>WhatsApp</th><th>Poin Aktif</th><th>Aksi</th></tr></thead>
+                <thead><tr><th>Nama</th><th>WhatsApp</th><th>Status</th><th>Aksi</th></tr></thead>
                 <tbody id="memberTable"><tr><td colspan="4" style="text-align:center;padding:30px;">Memuat...</td></tr></tbody>
               </table>
             </div>
@@ -356,7 +356,7 @@
         <tr>
           <td class="fw-600">${m.name}</td>
           <td class="fs-13 text-secondary">${m.phone}</td>
-          <td><span class="badge badge-primary">${m.total_points || 0} Poin</span></td>
+          <td><span class="badge badge-primary">Member (Diskon 5%)</span></td>
           <td><button class="btn btn-secondary btn-sm" onclick='openMemberModal(${JSON.stringify(m).replace(/'/g, "\\'")})'>Edit</button></td>
         </tr>
       `).join('');

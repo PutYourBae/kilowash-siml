@@ -15,6 +15,11 @@ const Customer = sequelize.define('Customer', {
     type: DataTypes.STRING(20),
     allowNull: false
   },
+  // Status member (mendapat diskon 5%)
+  is_member: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false
+  },
   // Total poin aktif yang dimiliki pelanggan saat ini
   total_points: {
     type: DataTypes.INTEGER,

@@ -113,23 +113,20 @@
   <script src="../js/config.js"></script>
   <script src="../js/app.js"></script>
   <script>
-    const user = requireAuth(['owner', 'admin', 'branch_admin', 'kasir']);
-    const token = () => localStorage.getItem('kw_token');
+    document.addEventListener('DOMContentLoaded', () => {
+      const user = requireAuth(['owner', 'admin', 'branch_admin', 'kasir']);
+      if (user) {
+        loadBranchFilter().then(() => loadRatings());
+      }
+    });
+
     let currentPage = 1;
     let totalPages  = 1;
     let searchTimer = null;
 
-    async function apiFetch(path, options = {}) {
-      const res = await fetch(CONFIG.API_BASE + path, {
-        ...options,
-        headers: { 'Authorization': 'Bearer ' + token(), 'Content-Type': 'application/json', ...(options.headers || {}) }
-      });
-      return res.json();
-    }
-
     async function loadBranchFilter() {
-      const data = await apiFetch('/branches');
-      if (!data.success) return;
+      const { ok, data } = await api('/branches');
+      if (!ok) return;
       const sel = document.getElementById('filterBranch');
       data.data.forEach(b => {
         const opt = document.createElement('option');
@@ -150,8 +147,8 @@
       if (branchId) url += `&branch_id=${branchId}`;
       if (flagged)  url += `&flagged_only=${flagged}`;
 
-      const data = await apiFetch(url);
-      if (!data.success) return;
+      const { ok, data } = await api(url);
+      if (!ok) return;
 
       const { ratings, totalItems, totalPages: tp, summary } = data.data;
       totalPages = tp;
@@ -225,9 +222,9 @@
     }
 
     async function toggleFlag(id) {
-      const data = await apiFetch(`/ratings/${id}/flag`, { method: 'PATCH' });
-      if (data.success) fetchRatings();
-      else alert(data.message || 'Gagal mengubah status flag.');
+      const { ok, data } = await api(`/ratings/${id}/flag`, 'PATCH');
+      if (ok) fetchRatings();
+      else alert(data?.message || 'Gagal mengubah status flag.');
     }
 
     function changePage(delta) {
@@ -240,8 +237,7 @@
       searchTimer = setTimeout(fetchRatings, 300);
     }
 
-    // Init
-    loadBranchFilter().then(() => loadRatings());
+
   </script>
 </body>
 </html>

@@ -57,8 +57,13 @@ exports.updateUser = async (req, res) => {
   try {
     const user = await User.findByPk(req.params.id);
     if (!user) return res.status(404).json({ success: false, message: 'User tidak ditemukan' });
-    const { name, role, is_active, password, branch_id } = req.body;
+    const { name, email, role, is_active, password, branch_id } = req.body;
     const updateData = { name, role, is_active, branch_id: branch_id || null };
+    if (email && email !== user.email) {
+      const existing = await User.findOne({ where: { email } });
+      if (existing) return res.status(400).json({ success: false, message: 'Email sudah digunakan oleh pengguna lain' });
+      updateData.email = email;
+    }
     if (password) updateData.password = await bcrypt.hash(password, 10);
     await user.update(updateData);
     res.json({ success: true, user: { id: user.id, name: user.name, role: user.role, is_active: user.is_active, branch_id: user.branch_id } });
